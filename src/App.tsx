@@ -16,7 +16,6 @@ function App() {
     <>
       <div className='bg-black box'>box</div>
       <div id="blue">blue</div>
-       
     </>
   )
 }
