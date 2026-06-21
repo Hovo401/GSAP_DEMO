@@ -35,7 +35,14 @@ export default function Approach() {
   );
 
   return (
-    <section id="approach" ref={root} className="relative bg-paper">
+    // pb gives the LAST card enough scroll runway to finish rising and fully
+    // cover the previous one (leaving just its peek), then rest a beat before
+    // the section releases. Stats below is also cream, so it blends seamlessly.
+    <section
+      id="approach"
+      ref={root}
+      className="relative bg-paper pb-[36vh]"
+    >
       {approach.map((step, i) => {
         const dark = step.tone === "ink";
         return (
