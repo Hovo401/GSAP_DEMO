@@ -41,12 +41,12 @@ export default function Approach() {
         return (
           <div
             key={step.no}
-            className="approach-card relative h-screen px-3 pt-20 md:px-10"
+            className="approach-card relative h-[64vh] px-3 pt-32 md:px-10"
             style={{ zIndex: i + 1 }}
           >
             {/* Inset card floating on the light frame */}
             <div
-              className={`card-bg relative mx-auto flex h-[calc(100vh-6.5rem)] w-full max-w-[1500px] flex-col overflow-hidden rounded-[2.5rem] px-8 py-12 md:px-16 md:py-14 ${
+              className={`card-bg relative mx-auto flex h-[calc(64vh-6.5rem)] w-full max-w-[1500px] flex-col overflow-hidden rounded-[2.5rem] px-8 py-12 md:px-16 md:py-14 ${
                 dark ? "bg-ink text-paper" : "bg-flame text-paper"
               }`}
             >
