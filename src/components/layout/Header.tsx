@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-
-const navItems = [
-  { label: "Work", href: "#work" },
-  { label: "Services", href: "#services" },
-  { label: "Approach", href: "#approach" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
-];
+import { nav as navItems } from "../../content/site";
 
 export default function Header() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null); // null = top of page
@@ -25,7 +18,7 @@ export default function Header() {
   // Position of the red dot (circle home position)
   const dotRef = useRef<HTMLDivElement>(null);
 
-  const getNavRect = () => navRef.current?.getBoundingClientRect();
+  // const getNavRect = () => navRef.current?.getBoundingClientRect();
 
   // Move pill to a nav item
   const movePillToItem = (index: number) => {
@@ -51,14 +44,13 @@ export default function Header() {
     const navRect = nav.getBoundingClientRect();
     const dotRect = dot.getBoundingClientRect();
     // center the circle vertically inside nav height
-    const size = dotRect.height; // same size as red dot
     // position: to the left of the nav, aligned with the dot
     // We'll place it just after the dot (dot is outside nav, so left will be negative)
-    const left = dotRect.right - navRect.left - 35;
+    const left = dotRect.right - navRect.left - 25;
     setPillStyle({
       left,
-      width: size,
-      height: size,
+      width: 20,
+      height: 20,
       borderRadius: "999px",
       opacity: 1,
     });
@@ -67,11 +59,6 @@ export default function Header() {
   // Scroll spy + initial
   useEffect(() => {
     const handleScroll = () => {
-      const atTop = window.scrollY < 60;
-      if (atTop) {
-        setActiveIndex(null);
-        return;
-      }
       const offsets = navItems.map((item) => {
         const el = document.querySelector(item.href);
         if (!el) return Infinity;
@@ -117,30 +104,38 @@ export default function Header() {
       <header className="fixed top-0 left-0 right-0 z-50 flex items-start justify-center px-6 pt-5 pointer-events-none">
         {/* ── DESKTOP NAV ── */}
         <div className="hidden md:flex items-center gap-3 pointer-events-auto">
-          {/* Red dot */}
+          {/* Brand dot */}
           <div
             ref={dotRef}
-            className="w-9 h-9 rounded-full shadow-md flex-shrink-0"
-          />
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(245,84,56)] text-sm font-black text-white"
+            style={{ boxShadow: "0 0px 6px rgba(0,0,0,0.50)" }}
+          >
+            M
+          </div>
 
           {/* Nav pill container — pill lives INSIDE here but visually can overflow left */}
           <div
             ref={navRef}
-            className="relative flex items-center bg-white rounded-full px-2 py-2 overflow-visible"
-            style={{ boxShadow: "0 2px 20px rgba(0,0,0,0.10)" }}
+            className="relative flex h-[56px] justify-center items-center rounded-full px-2 py-2 overflow-visible
+              "
+            style={{ boxShadow: "0 0px 6px rgba(0,0,0,0.50)" }}
           >
-            {/* THE MOVING PILL */}
+            <div className="absolute inset-0 rounded-full backdrop-blur-xl bg-[rgba(177,177,179,0.60)] pointer-events-none" />
+
             <span
-              className="absolute top-2 bottom-2 bg-[#e8423c] pointer-events-none"
+              className="absolute mx-0 top-2 bottom-2 backdrop-blur-md bg-[rgba(245,84,56,0.95)] pointer-events-none"
               style={{
+                boxShadow: "0 0px 6px rgba(0,0,0,0.50)",
                 left: pillStyle.left,
                 width: pillStyle.width,
                 height: pillStyle.height,
                 borderRadius: pillStyle.borderRadius,
                 opacity: pillStyle.opacity,
+                margin: "auto",
                 transition: [
-                  "left 0.55s cubic-bezier(0.34,1.35,0.64,1)",
-                  "width 0.50s cubic-bezier(0.34,1.35,0.64,1)",
+                  "left 0.5s ease-in-out",
+                  "width 0.5s ease-in-out",
+                  "height 0.5s ease-in-out",
                   "border-radius 0.3s ease",
                   "opacity 0.2s ease",
                 ].join(", "),
@@ -154,9 +149,30 @@ export default function Header() {
                   itemRefs.current[i] = el;
                 }}
                 onClick={() => handleNavClick(i, item.href)}
-                className="relative z-10 px-5 py-2 rounded-full text-sm font-medium text-[#1a1a1a] hover:text-black transition-colors duration-150 whitespace-nowrap"
+                className="relative z-10 px-5 rounded-full text-sm font-medium text-[#111] transition-colors duration-150 whitespace-nowrap"
               >
-                {item.label}
+                <div
+                  className={`h-[25px] overflow-hidden text-[16px] ${activeIndex !== i ? "group" : ""}`}
+                >
+                  <div className="grid">
+                    <div
+                      className={`col-start-1 row-start-1 transition-transform duration-300 ease-in-out ${activeIndex !== i ? "group-hover:-translate-y-[23px]" : ""}`}
+                    >
+                      <p className={activeIndex === i ? "text-white" : ""}>
+                        {item.label}
+                      </p>
+                      <p className="text-[rgb(245,84,56)]">{item.label}</p>
+                    </div>
+
+                    <div
+                      className={`col-start-1 row-start-1 relative flex -translate-y-[23px] transition-transform duration-300 ease-in-out ${activeIndex !== i ? "group-hover:translate-y-0" : ""}`}
+                    >
+                      <p className="text-[rgb(245,84,56)] flex">
+                        (<p className="opacity-0">{item.label}</p>)
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </button>
             ))}
           </div>
@@ -184,7 +200,7 @@ export default function Header() {
           <div
             className="relative bg-white rounded-3xl m-4 w-64 shadow-2xl"
             style={{
-              animation: "slideDown 0.28s cubic-bezier(0.34,1.4,0.64,1) both",
+              animation: "slideDown 0.28s ease-out both",
             }}
             onClick={(e) => e.stopPropagation()}
           >
