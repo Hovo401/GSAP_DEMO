@@ -1,231 +1,221 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { nav as navItems } from "../../content/site";
 
+// Home position of the flame indicator: a lone dot sitting just left of the pill.
+const HOME_LEFT = -46;
+const DOT_SIZE = 34;
+
+type Pill = {
+  left: number;
+  width: number;
+  height: number;
+  radius: number;
+  opacity: number;
+};
+
+const HOME_PILL: Pill = {
+  left: HOME_LEFT,
+  width: DOT_SIZE,
+  height: DOT_SIZE,
+  radius: 999,
+  opacity: 1,
+};
+
 export default function Header() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null); // null = top of page
-  const [pillStyle, setPillStyle] = useState({
-    left: 0,
-    width: 0,
-    height: 0,
-    borderRadius: "999px",
-    opacity: 0,
-  });
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // null = at the very top → flame is just a dot to the left of the menu.
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [pill, setPill] = useState<Pill>({ ...HOME_PILL, opacity: 0 });
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  // Position of the red dot (circle home position)
-  const dotRef = useRef<HTMLDivElement>(null);
+  const contactIndex = navItems.length - 1;
 
-  // const getNavRect = () => navRef.current?.getBoundingClientRect();
-
-  // Move pill to a nav item
-  const movePillToItem = (index: number) => {
-    const el = itemRefs.current[index];
+  // Place the flame indicator: a left dot when idle, a pill behind the active item.
+  const updateIndicator = useCallback(() => {
     const nav = navRef.current;
-    if (!el || !nav) return;
+    if (!nav) return;
+
+    if (activeIndex === null) {
+      setPill(HOME_PILL);
+      return;
+    }
+
+    const el = itemRefs.current[activeIndex];
+    if (!el) return;
     const navRect = nav.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    setPillStyle({
-      left: elRect.left - navRect.left,
-      width: elRect.width,
-      height: elRect.height,
-      borderRadius: "999px",
+    const r = el.getBoundingClientRect();
+    setPill({
+      left: r.left - navRect.left,
+      width: r.width,
+      height: r.height,
+      radius: 999,
       opacity: 1,
     });
-  };
-
-  // Shrink pill back to circle near red dot (outside nav, left side)
-  const movePillToDot = () => {
-    const dot = dotRef.current;
-    const nav = navRef.current;
-    if (!dot || !nav) return;
-    const navRect = nav.getBoundingClientRect();
-    const dotRect = dot.getBoundingClientRect();
-    // center the circle vertically inside nav height
-    // position: to the left of the nav, aligned with the dot
-    // We'll place it just after the dot (dot is outside nav, so left will be negative)
-    const left = dotRect.right - navRect.left - 25;
-    setPillStyle({
-      left,
-      width: 20,
-      height: 20,
-      borderRadius: "999px",
-      opacity: 1,
-    });
-  };
-
-  // Scroll spy + initial
-  useEffect(() => {
-    const handleScroll = () => {
-      const offsets = navItems.map((item) => {
-        const el = document.querySelector(item.href);
-        if (!el) return Infinity;
-        return Math.abs(el.getBoundingClientRect().top - 100);
-      });
-      const closest = offsets.indexOf(Math.min(...offsets));
-      if (offsets[closest] < window.innerHeight) {
-        setActiveIndex(closest);
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Animate pill on activeIndex change
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (activeIndex === null) {
-        movePillToDot();
-      } else {
-        movePillToItem(activeIndex);
-      }
-    }, 30);
-    return () => clearTimeout(t);
   }, [activeIndex]);
 
-  // Also recalc on mount after refs ready
+  // Scroll spy: the active item is the last section whose top has crossed the
+  // trigger line. Above the first section we stay null → lone dot at the top.
   useEffect(() => {
-    const t = setTimeout(() => movePillToDot(), 80);
-    return () => clearTimeout(t);
+    const TRIGGER = 120;
+    const onScroll = () => {
+      let current: number | null = null;
+      navItems.forEach((item, i) => {
+        const el = document.querySelector(item.href);
+        if (el && el.getBoundingClientRect().top <= TRIGGER) current = i;
+      });
+      setActiveIndex(current);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleNavClick = (index: number, href: string) => {
-    setActiveIndex(index);
-    setMobileMenuOpen(false);
-    const target = document.querySelector(href);
-    if (target) target.scrollIntoView({ behavior: "smooth" });
+  // Reposition whenever the target changes, on resize, and once fonts settle.
+  useEffect(() => {
+    const id = requestAnimationFrame(updateIndicator);
+    return () => cancelAnimationFrame(id);
+  }, [updateIndicator]);
+
+  useEffect(() => {
+    const onResize = () => updateIndicator();
+    window.addEventListener("resize", onResize);
+    document.fonts?.ready.then(updateIndicator);
+    return () => window.removeEventListener("resize", onResize);
+  }, [updateIndicator]);
+
+  const goTo = (href: string) => {
+    setMobileOpen(false);
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+  };
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  // Colour treatment per item: active (on flame) > Contact CTA > default.
+  const itemTone = (active: boolean, isContact: boolean) => {
+    if (active) return "text-white";
+    if (isContact) return "bg-black/[0.06] text-ink hover:bg-black/[0.1]";
+    return "text-ink/75 hover:text-ink";
   };
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-start justify-center px-6 pt-5 pointer-events-none">
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-start justify-center px-6 pt-5">
         {/* ── DESKTOP NAV ── */}
-        <div className="hidden md:flex items-center gap-3 pointer-events-auto">
-          {/* Brand dot */}
-          <div
-            ref={dotRef}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(245,84,56)] text-sm font-black text-white"
-            style={{ boxShadow: "0 0px 6px rgba(0,0,0,0.50)" }}
-          >
-            M
-          </div>
-
-          {/* Nav pill container — pill lives INSIDE here but visually can overflow left */}
+        <div className="pointer-events-auto hidden md:block">
           <div
             ref={navRef}
-            className="relative flex h-[56px] justify-center items-center rounded-full px-2 py-2 overflow-visible
-              "
-            style={{ boxShadow: "0 0px 6px rgba(0,0,0,0.50)" }}
+            className="relative flex h-14 items-center overflow-visible rounded-full px-2"
           >
-            <div className="absolute inset-0 rounded-full backdrop-blur-xl bg-[rgba(177,177,179,0.60)] pointer-events-none" />
+            {/* Frosted white pill */}
+            <div className="pointer-events-none absolute inset-0 rounded-full bg-white/90 shadow-[0_10px_34px_rgba(0,0,0,0.20)] ring-1 ring-black/5 backdrop-blur-xl" />
 
+            {/* Invisible home hit-area under the flame dot */}
+            <button
+              onClick={scrollTop}
+              aria-label="Back to top"
+              className="absolute top-1/2 -translate-y-1/2 rounded-full"
+              style={{ left: HOME_LEFT, width: DOT_SIZE, height: DOT_SIZE }}
+            />
+
+            {/* The single flame element: dot at the top, active-pill on scroll */}
             <span
-              className="absolute mx-0 top-2 bottom-2 backdrop-blur-md bg-[rgba(245,84,56,0.95)] pointer-events-none"
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 -translate-y-1/2 bg-flame shadow-[0_6px_18px_rgba(245,84,56,0.45)]"
               style={{
-                boxShadow: "0 0px 6px rgba(0,0,0,0.50)",
-                left: pillStyle.left,
-                width: pillStyle.width,
-                height: pillStyle.height,
-                borderRadius: pillStyle.borderRadius,
-                opacity: pillStyle.opacity,
-                margin: "auto",
-                transition: [
-                  "left 0.5s ease-in-out",
-                  "width 0.5s ease-in-out",
-                  "height 0.5s ease-in-out",
-                  "border-radius 0.3s ease",
-                  "opacity 0.2s ease",
-                ].join(", "),
+                left: pill.left,
+                width: pill.width,
+                height: pill.height,
+                borderRadius: pill.radius,
+                opacity: pill.opacity,
+                transition:
+                  "left .55s cubic-bezier(.65,.05,.36,1), width .55s cubic-bezier(.65,.05,.36,1), height .4s ease, border-radius .3s ease, opacity .25s ease",
               }}
             />
 
-            {navItems.map((item, i) => (
-              <button
-                key={item.label}
-                ref={(el) => {
-                  itemRefs.current[i] = el;
-                }}
-                onClick={() => handleNavClick(i, item.href)}
-                className="relative z-10 px-5 rounded-full text-sm font-medium text-[#111] transition-colors duration-150 whitespace-nowrap"
-              >
-                <div
-                  className={`h-[25px] overflow-hidden text-[16px] ${activeIndex !== i ? "group" : ""}`}
+            {navItems.map((item, i) => {
+              const active = activeIndex === i;
+              const isContact = i === contactIndex;
+              return (
+                <button
+                  key={item.label}
+                  ref={(el) => {
+                    itemRefs.current[i] = el;
+                  }}
+                  onClick={() => goTo(item.href)}
+                  className={`relative z-10 mx-0.5 flex h-10 items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
                 >
-                  <div className="grid">
-                    <div
-                      className={`col-start-1 row-start-1 transition-transform duration-300 ease-in-out ${activeIndex !== i ? "group-hover:-translate-y-[23px]" : ""}`}
+                  {/* Roll-up label: hovering reveals a flame-colored copy */}
+                  <span
+                    className={`block h-6 overflow-hidden ${active ? "" : "group/label"}`}
+                  >
+                    <span
+                      className={`block transition-transform duration-300 ease-out ${
+                        active ? "" : "group-hover/label:-translate-y-6"
+                      }`}
                     >
-                      <p className={activeIndex === i ? "text-white" : ""}>
+                      <span
+                        className={`block h-6 leading-6 ${active ? "text-white" : ""}`}
+                      >
                         {item.label}
-                      </p>
-                      <p className="text-[rgb(245,84,56)]">{item.label}</p>
-                    </div>
-
-                    <div
-                      className={`col-start-1 row-start-1 relative flex -translate-y-[23px] transition-transform duration-300 ease-in-out ${activeIndex !== i ? "group-hover:translate-y-0" : ""}`}
-                    >
-                      <p className="text-[rgb(245,84,56)] flex">
-                        (<p className="opacity-0">{item.label}</p>)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
+                      </span>
+                      <span className="block h-6 leading-6 text-flame">
+                        {item.label}
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* ── MOBILE MENU BUTTON ── */}
-        <div className="md:hidden ml-auto pointer-events-auto">
+        <div className="pointer-events-auto ml-auto md:hidden">
           <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="bg-white rounded-2xl px-6 py-3 text-sm font-medium text-[#1a1a1a]"
-            style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.10)" }}
+            onClick={() => setMobileOpen(true)}
+            className="flex items-center gap-2 rounded-full bg-white/90 px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-xl"
           >
+            <span className="h-2 w-2 rounded-full bg-flame" />
             Menu
           </button>
         </div>
       </header>
 
       {/* ── MOBILE DRAWER ── */}
-      {mobileMenuOpen && (
+      {mobileOpen && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-end"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={() => setMobileOpen(false)}
         >
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative bg-white rounded-3xl m-4 w-64 shadow-2xl"
-            style={{
-              animation: "slideDown 0.28s ease-out both",
-            }}
+            className="relative m-4 w-64 rounded-3xl bg-white shadow-2xl"
+            style={{ animation: "slideDown 0.28s ease-out both" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-gray-200" />
-            </div>
-            <div className="flex justify-end px-5 py-3">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+              <span className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <span className="h-2.5 w-2.5 rounded-full bg-flame" />
+                Menu
+              </span>
               <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-medium text-[#1a1a1a]"
+                onClick={() => setMobileOpen(false)}
+                className="text-sm font-medium text-ink/50 hover:text-ink"
               >
                 Close
               </button>
             </div>
-            <div className="h-px bg-gray-100 mx-5 mb-2" />
-            <nav className="flex flex-col items-end px-6 pb-8">
+            <div className="mx-5 h-px bg-black/5" />
+            <nav className="flex flex-col px-3 py-3">
               {navItems.map((item, i) => (
                 <button
                   key={item.label}
-                  ref={(el) => {
-                    itemRefs.current[i] = el;
-                  }}
-                  onClick={() => handleNavClick(i, item.href)}
-                  // Добавлена очистка фокуса и выделения текста
-                  className="relative z-10 px-5 py-2 rounded-full  text-sm font-medium text-[#1a1a1a] hover:text-black transition-colors duration-150 whitespace-nowrap focus:outline-none select-none"
+                  onClick={() => goTo(item.href)}
+                  className={`rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
+                    activeIndex === i
+                      ? "bg-flame text-white"
+                      : "text-ink/80 hover:bg-black/[0.05]"
+                  }`}
                 >
                   {item.label}
                 </button>
@@ -234,13 +224,6 @@ export default function Header() {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-14px) scale(0.96); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-      `}</style>
     </>
   );
 }
