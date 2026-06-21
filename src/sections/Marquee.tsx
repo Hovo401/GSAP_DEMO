@@ -42,9 +42,16 @@ export default function Marquee() {
   return (
     <div
       ref={root}
-      className="overflow-hidden border-y-2 border-paper/20 bg-ink py-6"
+      className="relative overflow-hidden border-y-2 border-paper/20 bg-ink py-6"
     >
-      <div ref={trackRef} className="flex w-max items-center gap-8 whitespace-nowrap">
+      {/* Edge fades so the strip melts into the background */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-ink to-transparent md:w-40" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-ink to-transparent md:w-40" />
+
+      <div
+        ref={trackRef}
+        className="flex w-max items-center gap-8 whitespace-nowrap"
+      >
         {words.map((word, i) => (
           <span key={i} className="flex items-center gap-8">
             <span className="font-display text-5xl tracking-tight text-paper/80 uppercase md:text-7xl">

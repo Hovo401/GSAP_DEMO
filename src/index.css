@@ -35,6 +35,62 @@ body {
   color: var(--color-paper);
 }
 
+/* Flame-tinted text selection — small detail, ties the palette together. */
+::selection {
+  background-color: var(--color-flame);
+  color: var(--color-ink);
+}
+
+/* Slim, on-brand scrollbar (WebKit) + Firefox fallback. */
+html {
+  scrollbar-color: var(--color-flame) var(--color-ink);
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 999px;
+  border: 2px solid var(--color-ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-flame);
+}
+
+/* ── Reusable atmosphere helpers ─────────────────────────────────
+   .grain  — fixed film-grain overlay for premium texture.
+   .glow   — soft radial flame light; size/position via utilities.    */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.glow {
+  border-radius: 9999px;
+  filter: blur(80px);
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--color-flame) 55%, transparent),
+    transparent 70%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::after {
+    display: none;
+  }
+}
+
 /* Kill the focus outline / tap highlight on the custom nav buttons only. */
 header button,
 nav button {

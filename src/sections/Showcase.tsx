@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "../lib/gsap";
 import { showcase, showcaseIntro } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import VisitBadge from "../components/ui/VisitBadge";
 
 export default function Showcase() {
   const root = useRef<HTMLElement>(null);
@@ -89,22 +90,34 @@ export default function Showcase() {
             key={item.no}
             className="showcase-card group flex h-full w-[82vw] shrink-0 items-center px-3 sm:w-[58vw] md:w-[34vw]"
           >
-            <div className="flex h-[74vh] w-full flex-col rounded-3xl border border-paper/12 bg-[#161616] p-8 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 md:p-10">
-              <span className="card-reveal text-base text-paper/40">
-                ({item.no})
+            <div className="relative flex h-[74vh] w-full flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10">
+              {/* Flame wash that fades in on hover */}
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+              {/* Giant index watermark */}
+              <span className="font-display pointer-events-none absolute -bottom-8 -left-2 text-[12rem] leading-none text-paper/[0.03] select-none">
+                {item.no}
               </span>
 
-              <h3 className="card-reveal font-display mt-6 text-5xl leading-[0.95] uppercase text-flame md:text-6xl">
+              <div className="card-reveal relative flex items-center justify-between">
+                <span className="text-base text-paper/40">({item.no})</span>
+                <span className="inline-block rounded-full border border-paper/15 px-3 py-1 text-[0.65rem] font-medium tracking-[0.25em] text-paper/45 uppercase">
+                  {item.tag}
+                </span>
+              </div>
+
+              <h3 className="card-reveal font-display relative mt-6 text-5xl leading-[0.95] text-flame uppercase md:text-6xl">
                 {item.title}
               </h3>
 
-              <p className="card-reveal mt-3 text-xs font-medium tracking-[0.3em] text-paper/35 uppercase">
-                {item.tag}
-              </p>
-
-              <p className="card-reveal mt-auto max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
+              <p className="card-reveal relative mt-auto max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
                 {item.body}
               </p>
+
+              {/* Rotating "visit project" badge surfaces on hover */}
+              <div className="pointer-events-none absolute right-6 bottom-6 scale-75 opacity-0 transition-all duration-300 ease-out group-hover:scale-100 group-hover:opacity-100">
+                <VisitBadge />
+              </div>
             </div>
           </article>
         ))}

@@ -21,7 +21,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-ink text-paper">
+    <div className="grain bg-ink text-paper">
       <Preloader />
       <ScrollProgress />
       <Hero />
