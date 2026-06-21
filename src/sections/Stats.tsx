@@ -29,7 +29,7 @@ export default function Stats() {
   );
 
   return (
-    <section ref={root} className="bg-paper px-6 py-24 text-ink md:px-12">
+    <section id="stats" ref={root} className="bg-paper px-6 py-24 text-ink md:px-12">
       <div className="mx-auto grid max-w-6xl gap-12 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="border-t-2 border-ink pt-6">

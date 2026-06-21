@@ -5,11 +5,12 @@ export const brand = {
   tagline: "Motion design engine",
 };
 
+// Menu concept from blinkpath.com — the orange "M" dot acts as Home.
 export const nav = [
-  { label: "Home", href: "#home" },
-  { label: "Features", href: "#features" },
-  { label: "Showcase", href: "#showcase" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Work", href: "#showcase" },
+  { label: "Services", href: "#features" },
+  { label: "Approach", href: "#approach" },
+  { label: "About", href: "#stats" },
   { label: "Contact", href: "#cta" },
 ];
 
@@ -60,31 +61,65 @@ export const features = [
   },
 ];
 
-// Horizontal showcase slides.
+// Horizontal showcase gallery.
+export const showcaseIntro = {
+  kicker: "Selected work",
+  title: "Our work",
+  body: "Teams trust MOTIVE to push creative boundaries and move fast when it matters — buttery scroll work, shipped.",
+};
+
 export const showcase = [
   {
     no: "01",
     title: "Aurora",
     tag: "Product launch",
-    accent: "bg-flame text-ink",
+    body: "A launch site built to convert. Scroll-linked product reveals and pinned feature beats keep visitors moving toward the buy — every frame earns the next scroll.",
   },
   {
     no: "02",
     title: "Meridian",
     tag: "Brand site",
-    accent: "bg-blue-700 text-paper",
+    body: "A brand world rebuilt for motion. Bold type, fluid transitions, and a homepage that grabs attention from the first frame and never lets the eye rest.",
   },
   {
     no: "03",
     title: "Halcyon",
     tag: "Editorial",
-    accent: "bg-teal-600 text-ink",
+    body: "An editorial platform where reading feels alive. Typographic reveals and parallax imagery add depth without ever fighting the content itself.",
   },
   {
     no: "04",
     title: "Vantage",
     tag: "Case study",
-    accent: "bg-orange-500 text-ink",
+    body: "A data story told through scroll. Animated counters and staged reveals turn dense numbers into a narrative anyone can follow at a glance.",
+  },
+];
+
+// Stacking-cards "Approach" section. Tone alternates flame / ink.
+export const approach = [
+  {
+    no: "01",
+    title: "Strategy",
+    body: "We map the scroll story before a single pixel moves — what the visitor should feel at every beat, and exactly why it matters.",
+    tone: "ink",
+  },
+  {
+    no: "02",
+    title: "Design",
+    body: "Bold, brutal layouts with intent. Type that commands the page and structure that earns every single scroll.",
+    tone: "flame",
+  },
+  {
+    no: "03",
+    title: "Motion",
+    body: "Every transition tuned by hand — scrubbed to scroll, eased for weight, never janky and never gratuitous.",
+    tone: "ink",
+  },
+  {
+    no: "04",
+    title: "Ship",
+    body: "Performance-first and accessible by default. Reduced-motion aware, sixty frames a second, ready for real users.",
+    tone: "flame",
   },
 ];
 

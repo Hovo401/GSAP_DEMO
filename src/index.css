@@ -55,9 +55,22 @@ nav button {
   }
 }
 
+/* Rotating "visit project" badge on showcase cards. */
+@keyframes badge-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.badge-spin {
+  animation: badge-spin 16s linear infinite;
+}
+
 /* Respect users who ask for less motion: no scroll-jacking weirdness. */
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
+  }
+  .badge-spin {
+    animation: none !important;
   }
 }
