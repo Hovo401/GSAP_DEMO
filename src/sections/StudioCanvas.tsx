@@ -6,6 +6,9 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import {
   CANVAS_W,
   CANVAS_H,
+  ZOOM_MIN,
+  ZOOM_MAX,
+  ZOOM_STEP,
   makeSeedPages,
   drawWires,
 } from "./studio/geometry";
@@ -19,6 +22,7 @@ export default function StudioCanvas() {
   const root = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const zoomLayerRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const watermarkRef = useRef<HTMLSpanElement>(null);
   const pendingRef = useRef<SVGPathElement>(null);
@@ -32,6 +36,11 @@ export default function StudioCanvas() {
 
   const [pages, setPages] = useState<Page[]>(() => makeSeedPages());
   const [activePageId, setActivePageId] = useState(studio.pages[0].id);
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(zoom);
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState({ label: "", sub: "" });
   const [hoverDelete, setHoverDelete] = useState<{
@@ -94,6 +103,7 @@ export default function StudioCanvas() {
     scope: root,
     stageRef,
     canvasRef,
+    zoomLayerRef,
     bgRef,
     watermarkRef,
     pendingRef,
@@ -103,14 +113,20 @@ export default function StudioCanvas() {
     dragInstRef,
     lastPosRef,
     pagesRef,
-    activePageIdRef,
     reduced,
     activePageId,
     noteIds,
     activePage,
+    zoom,
+    zoomRef,
     setPages,
     withActivePage,
   });
+
+  const handleZoomIn = () =>
+    setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100));
+  const handleZoomOut = () =>
+    setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100));
 
   useEffect(() => {
     Object.entries(dragInstRef.current).forEach(([id, inst]) => {
@@ -122,7 +138,7 @@ export default function StudioCanvas() {
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || reduced) return;
-    drawWires(canvas, wireRefs.current, hitRefs.current, activePage.links);
+    drawWires(canvas, wireRefs.current, hitRefs.current, activePage.links, zoomRef.current);
   }, [activePage.links, activePageId, reduced]);
 
   const onWireEnter = (linkId: string, path: SVGPathElement) => {
@@ -324,48 +340,50 @@ export default function StudioCanvas() {
           </>
         ) : (
           <>
-            <div
-              ref={canvasRef}
-              className="absolute top-0 left-0 will-change-transform"
-              style={{ width: CANVAS_W, height: CANVAS_H }}
-            >
+            <div ref={zoomLayerRef} className="absolute inset-0 origin-top-left">
               <div
-                ref={bgRef}
-                className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
-                  backgroundSize: "44px 44px",
-                }}
+                ref={canvasRef}
+                className="absolute top-0 left-0 will-change-transform"
+                style={{ width: CANVAS_W, height: CANVAS_H }}
               >
-                <span
-                  ref={watermarkRef}
-                  className="font-display pointer-events-none absolute top-[40%] left-[48%] text-[30rem] leading-none text-paper/3 uppercase will-change-transform"
+                <div
+                  ref={bgRef}
+                  className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+                    backgroundSize: "44px 44px",
+                  }}
                 >
-                  {studio.watermark}
-                </span>
-              </div>
+                  <span
+                    ref={watermarkRef}
+                    className="font-display pointer-events-none absolute top-[40%] left-[48%] text-[30rem] leading-none text-paper/3 uppercase will-change-transform"
+                  >
+                    {studio.watermark}
+                  </span>
+                </div>
 
-              {renderBoard({
-                notes: activePage.notes,
-                links: activePage.links,
-                interactive: true,
-                editingId,
-                draft,
-                hoverDelete,
-                wireRefs,
-                hitRefs,
-                pendingRef,
-                onWireEnter,
-                clearHoverDelete,
-                keepHoverDelete,
-                handleDeleteLink,
-                openEdit,
-                handleDeleteNote,
-                updateDraftLabel,
-                updateDraftSub,
-                commitEdit,
-              })}
+                {renderBoard({
+                  notes: activePage.notes,
+                  links: activePage.links,
+                  interactive: true,
+                  editingId,
+                  draft,
+                  hoverDelete,
+                  wireRefs,
+                  hitRefs,
+                  pendingRef,
+                  onWireEnter,
+                  clearHoverDelete,
+                  keepHoverDelete,
+                  handleDeleteLink,
+                  openEdit,
+                  handleDeleteNote,
+                  updateDraftLabel,
+                  updateDraftSub,
+                  commitEdit,
+                })}
+              </div>
             </div>
 
             <div
@@ -374,6 +392,27 @@ export default function StudioCanvas() {
             >
               <span className="text-flame">⟿</span>
               {studio.dragHint} · drag the wall to roam
+            </div>
+
+            <div className="absolute right-5 bottom-5 z-30 flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoom >= ZOOM_MAX}
+                aria-label="Zoom in"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoom <= ZOOM_MIN}
+                aria-label="Zoom out"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                −
+              </button>
             </div>
           </>
         )}

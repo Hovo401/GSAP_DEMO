@@ -1,6 +1,7 @@
-import type { RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { flushSync } from "react-dom";
 import { gsap, Draggable, useGSAP } from "../../lib/gsap";
+import { DURATION, EASE } from "../../lib/motion";
 import {
   CANVAS_W,
   CANVAS_H,
@@ -12,10 +13,13 @@ import {
 } from "./geometry";
 import type { Note, Link, Page, Pt } from "./types";
 
+type PanBounds = { minX: number; minY: number; maxX: number; maxY: number };
+
 type UseStudioDraggableParams = {
   scope: RefObject<HTMLElement | null>;
   stageRef: RefObject<HTMLDivElement | null>;
   canvasRef: RefObject<HTMLDivElement | null>;
+  zoomLayerRef: RefObject<HTMLDivElement | null>;
   bgRef: RefObject<HTMLDivElement | null>;
   watermarkRef: RefObject<HTMLSpanElement | null>;
   pendingRef: RefObject<SVGPathElement | null>;
@@ -25,11 +29,12 @@ type UseStudioDraggableParams = {
   dragInstRef: RefObject<Record<string, Draggable>>;
   lastPosRef: RefObject<Record<string, Pt>>;
   pagesRef: RefObject<Page[]>;
-  activePageIdRef: RefObject<string>;
   reduced: boolean;
   activePageId: string;
   noteIds: string;
   activePage: Page;
+  zoom: number;
+  zoomRef: RefObject<number>;
   setPages: (pages: Page[]) => void;
   withActivePage: (
     mutator: (notes: Note[], links: Link[]) => { notes: Note[]; links: Link[] },
@@ -41,6 +46,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
     scope,
     stageRef,
     canvasRef,
+    zoomLayerRef,
     bgRef,
     watermarkRef,
     pendingRef,
@@ -50,23 +56,29 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
     dragInstRef,
     lastPosRef,
     pagesRef,
-    activePageIdRef,
     reduced,
     activePageId,
     noteIds,
     activePage,
+    zoom,
+    zoomRef,
     setPages,
     withActivePage,
   } = params;
+
+  const panInstRef = useRef<Draggable | null>(null);
+  const panBoundsFnRef = useRef<(() => PanBounds) | null>(null);
 
   useGSAP(
     () => {
       const stage = stageRef.current;
       const canvas = canvasRef.current;
+      const zoomLayer = zoomLayerRef.current;
       const bg = bgRef.current;
       const watermark = watermarkRef.current;
       const pending = pendingRef.current;
-      if (reduced || !stage || !canvas || !bg || !pending) return;
+      if (reduced || !stage || !canvas || !zoomLayer || !bg || !pending)
+        return;
 
       const pageIdAtMount = activePageId;
       const nodeEls = gsap.utils.toArray<HTMLElement>(
@@ -84,11 +96,16 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
       };
       const currentLinks = () =>
         (
-          pagesRef.current.find((p) => p.id === activePageIdRef.current) ??
-          activePage
+          pagesRef.current.find((p) => p.id === pageIdAtMount) ?? activePage
         ).links;
       const redraw = () =>
-        drawWires(canvas, wireRefs.current, hitRefs.current, currentLinks());
+        drawWires(
+          canvas,
+          wireRefs.current,
+          hitRefs.current,
+          currentLinks(),
+          zoomRef.current,
+        );
 
       const settleNode = (
         id: string,
@@ -109,8 +126,10 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         gsap.set(node, { x: 0, y: 0 });
       };
 
-      const originX = (stage.clientWidth - CANVAS_W) / 2;
-      const originY = (stage.clientHeight - CANVAS_H) / 2;
+      gsap.set(zoomLayer, { scale: zoomRef.current });
+
+      const originX = (stage.clientWidth / zoomRef.current - CANVAS_W) / 2;
+      const originY = (stage.clientHeight / zoomRef.current - CANVAS_H) / 2;
       gsap.set(canvas, { x: originX, y: originY });
 
       if (watermark) gsap.set(watermark, { xPercent: -50, yPercent: -50 });
@@ -126,9 +145,9 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         });
       };
 
-      const panBounds = () => ({
-        minX: stage.clientWidth - CANVAS_W,
-        minY: stage.clientHeight - CANVAS_H,
+      const panBounds = (): PanBounds => ({
+        minX: stage.clientWidth / zoomRef.current - CANVAS_W,
+        minY: stage.clientHeight / zoomRef.current - CANVAS_H,
         maxX: 0,
         maxY: 0,
       });
@@ -143,6 +162,9 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         onDrag: updateParallax,
         onThrowUpdate: updateParallax,
       });
+
+      panInstRef.current = pan;
+      panBoundsFnRef.current = panBounds;
 
       const drags = nodeEls.map((node) => {
         const id = node.dataset.node ?? "";
@@ -166,7 +188,8 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
       let fromId: string | null = null;
       const boardPoint = (e: PointerEvent): Pt => {
         const b = canvas.getBoundingClientRect();
-        return { x: e.clientX - b.left, y: e.clientY - b.top };
+        const z = zoomRef.current;
+        return { x: (e.clientX - b.left) / z, y: (e.clientY - b.top) / z };
       };
 
       const onMove = (e: PointerEvent) => {
@@ -175,7 +198,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         if (out)
           pending.setAttribute(
             "d",
-            wirePath(centerOf(out, canvas), boardPoint(e)),
+            wirePath(centerOf(out, canvas, zoomRef.current), boardPoint(e)),
           );
       };
 
@@ -193,7 +216,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         canvas
           .querySelectorAll<HTMLElement>("[data-port$=':in']")
           .forEach((el) => {
-            const c = centerOf(el, canvas);
+            const c = centerOf(el, canvas, zoomRef.current);
             const dist = Math.hypot(c.x - drop.x, c.y - drop.y);
             if (dist < bestDist) {
               bestDist = dist;
@@ -280,8 +303,21 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
 
         pan.kill();
         drags.forEach((d) => d.kill());
+
+        panInstRef.current = null;
+        panBoundsFnRef.current = null;
       };
     },
     { scope, dependencies: [reduced, activePageId, noteIds] },
   );
+
+  useEffect(() => {
+    if (reduced) return;
+    const layer = zoomLayerRef.current;
+    if (!layer) return;
+    gsap.to(layer, { scale: zoom, duration: DURATION.fast, ease: EASE.softOut });
+    if (panBoundsFnRef.current) {
+      panInstRef.current?.applyBounds(panBoundsFnRef.current());
+    }
+  }, [zoom, reduced, zoomLayerRef]);
 }

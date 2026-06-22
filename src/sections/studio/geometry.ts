@@ -5,6 +5,10 @@ import type { Pt, Note, Link, Page } from "./types";
 export const CANVAS_W = 1700;
 export const CANVAS_H = 1150;
 
+export const ZOOM_MIN = 0.6;
+export const ZOOM_MAX = 1.6;
+export const ZOOM_STEP = 0.2;
+
 export function makeSeedPages(): Page[] {
   return studio.pages.map((page) => ({
     id: page.id,
@@ -14,15 +18,28 @@ export function makeSeedPages(): Page[] {
   }));
 }
 
-export function centerOf(el: Element, board: HTMLElement): Pt {
+// `zoom` is the CSS scale applied to an ancestor of `board`, so the raw
+// screen-pixel delta must be divided back down to board-local units.
+export function centerOf(el: Element, board: HTMLElement, zoom = 1): Pt {
   const r = el.getBoundingClientRect();
   const b = board.getBoundingClientRect();
-  return { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top };
+  return {
+    x: (r.left + r.width / 2 - b.left) / zoom,
+    y: (r.top + r.height / 2 - b.top) / zoom,
+  };
 }
 
 export function wirePath(a: Pt, b: Pt): string {
-  const dx = Math.max(40, Math.abs(b.x - a.x) * 0.5);
-  return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+  if (b.x >= a.x) {
+    const dx = Math.max(40, Math.abs(b.x - a.x) * 0.5);
+    return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+  }
+  // Backward link (feedback loop): scaling the control offset by the
+  // horizontal span would overshoot across the whole canvas, so dip
+  // below both ports instead of bowing sideways.
+  const dip = 70;
+  const midY = Math.max(a.y, b.y) + dip;
+  return `M ${a.x} ${a.y} C ${a.x + dip} ${midY}, ${b.x - dip} ${midY}, ${b.x} ${b.y}`;
 }
 
 // Redraw every wire's visible + hit path, in `board`-local coordinates.
@@ -31,12 +48,13 @@ export function drawWires(
   wires: Record<string, SVGPathElement | null>,
   hits: Record<string, SVGPathElement | null>,
   links: Link[],
+  zoom = 1,
 ) {
   links.forEach((link) => {
     const out = board.querySelector(`[data-port="${link.from}:out"]`);
     const inp = board.querySelector(`[data-port="${link.to}:in"]`);
     if (!out || !inp) return;
-    const d = wirePath(centerOf(out, board), centerOf(inp, board));
+    const d = wirePath(centerOf(out, board, zoom), centerOf(inp, board, zoom));
     wires[link.id]?.setAttribute("d", d);
     hits[link.id]?.setAttribute("d", d);
   });
