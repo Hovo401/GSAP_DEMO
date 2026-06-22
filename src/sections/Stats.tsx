@@ -2,10 +2,13 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "../lib/gsap";
 import { stats } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScramble } from "../hooks/useScramble";
+import { EASE, SCROLL_START } from "../lib/motion";
 
 export default function Stats() {
   const root = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
+  const headingRef = useScramble<HTMLHeadingElement>("Proof in motion");
 
   useGSAP(
     () => {
@@ -17,11 +20,11 @@ export default function Stats() {
         gsap.to(counter, {
           v: end,
           duration: 1.6,
-          ease: "power2.out",
+          ease: EASE.softOut,
           onUpdate: () => {
             el.firstChild!.textContent = Math.round(counter.v).toString();
           },
-          scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          scrollTrigger: { trigger: el, start: SCROLL_START.early, once: true },
         });
       });
     },
@@ -41,7 +44,10 @@ export default function Stats() {
               <span className="h-px w-8 bg-flame/60" />
               By the numbers
             </p>
-            <h2 className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl">
+            <h2
+              ref={headingRef}
+              className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl"
+            >
               Proof in motion
             </h2>
           </div>

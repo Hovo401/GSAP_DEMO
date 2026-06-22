@@ -1,12 +1,8 @@
-// All landing copy lives here. Rebrand the whole site by editing this file.
-
 export const brand = {
   name: "MOTIVE",
   tagline: "Motion design engine",
 };
 
-// Menu concept from blinkpath.com — the orange "M" dot acts as Home.
-// Contact is not a scroll target: it opens the layered side panel instead.
 export type NavItem = { label: string; href?: string; panel?: "contact" };
 
 export const nav: NavItem[] = [
@@ -17,7 +13,6 @@ export const nav: NavItem[] = [
   { label: "Contact", panel: "contact" },
 ];
 
-// Copy for the slide-in Contact panel.
 export const contactPanel = {
   eyebrow: "Contact us",
   title: "Have a project you’d like to talk about?",
@@ -38,14 +33,12 @@ export const contactPanel = {
 
 export const hero = {
   kicker: "Motion design engine",
-  // Split into lines for the SplitText reveal.
   titleLines: ["Animate", "anything"],
   accentWord: "anything",
   subtitle: "Ship buttery scroll experiences without fighting the timeline.",
   scrollHint: "Scroll to feel it",
 };
 
-// Word-by-word highlighted statement (TextReveal section).
 export const manifesto =
   "We build the web's future, pixel by pixel. Obsessive about detail, ruthless about smoothness — that is the whole point.";
 
@@ -59,6 +52,81 @@ export const marqueeWords = [
   "EASE",
   "REVEAL",
 ];
+
+export type StudioNode = {
+  id: string;
+  label: string;
+  sub: string;
+  kind: "in" | "fx" | "out";
+  x: number;
+  y: number;
+};
+
+export type StudioLink = { from: string; to: string };
+
+export const studio = {
+  kicker: "How we build",
+  title: "Sketch how it moves",
+  hint: "Drag the notes, wire outputs to inputs, edit the text — make it your own diagram.",
+  watermark: "MOTION",
+  dragHint: "Drag a port to connect",
+  addNoteLabel: "Add note",
+  downloadLabel: "Download image",
+  resetLabel: "Reset",
+  pageLabel: "Page",
+  newPageLabel: "New page",
+  editLabel: "Edit",
+  saveLabel: "Save",
+  deleteLabel: "Delete",
+  nodes: [
+    {
+      id: "scroll",
+      label: "Scroll",
+      sub: "the input",
+      kind: "in",
+      x: 4,
+      y: 28,
+    },
+    {
+      id: "pin",
+      label: "Pin",
+      sub: "hold the scene",
+      kind: "fx",
+      x: 26,
+      y: 62,
+    },
+    {
+      id: "stagger",
+      label: "Stagger",
+      sub: "sequence it",
+      kind: "fx",
+      x: 47,
+      y: 22,
+    },
+    {
+      id: "reveal",
+      label: "Reveal",
+      sub: "bring it in",
+      kind: "fx",
+      x: 64,
+      y: 58,
+    },
+    {
+      id: "ship",
+      label: "Ship",
+      sub: "60fps, accessible",
+      kind: "out",
+      x: 82,
+      y: 26,
+    },
+  ] satisfies StudioNode[],
+  links: [
+    { from: "scroll", to: "pin" },
+    { from: "pin", to: "stagger" },
+    { from: "stagger", to: "reveal" },
+    { from: "reveal", to: "ship" },
+  ] satisfies StudioLink[],
+};
 
 export const features = [
   {
@@ -83,7 +151,6 @@ export const features = [
   },
 ];
 
-// Horizontal showcase gallery.
 export const showcaseIntro = {
   kicker: "Selected work",
   title: "Our work",
@@ -117,7 +184,6 @@ export const showcase = [
   },
 ];
 
-// Stacking-cards "Approach" section. Tone alternates flame / ink.
 export const approach = [
   {
     no: "01",
@@ -183,6 +249,18 @@ export const pricing = [
     featured: false,
   },
 ];
+
+export const magicSection = {
+  topLines: [
+    "How was your visit",
+    "Don't forget to reach out to let me know what you think",
+  ],
+  bottomLines: [
+    "And if you want to create magic",
+    "Get in touch and we'll see how we can help",
+  ],
+  phrase: "Ready to create *maaaaaaaaaagic?*",
+};
 
 export const cta = {
   title: "Make it move",

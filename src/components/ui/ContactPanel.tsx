@@ -8,14 +8,6 @@ type Props = {
   onClose: () => void;
 };
 
-/**
- * Slide-in contact form, separate from the nav scroll targets.
- *
- * Three full-height layers (flame → ink → form) share the same drawer box and
- * slide in from the right with a slight stagger. Because the form sits on top
- * and arrives last, the layers behind it are briefly exposed as orange/black
- * bands sweeping across — the "opening in layers" look — then end fully covered.
- */
 export default function ContactPanel({ open, onClose }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -25,7 +17,6 @@ export default function ContactPanel({ open, onClose }: Props) {
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const reduced = useReducedMotion();
 
-  // Build the open/close timeline once; play/reverse it as `open` flips.
   useGSAP(
     () => {
       gsap.set(backdropRef.current, {
@@ -37,8 +28,6 @@ export default function ContactPanel({ open, onClose }: Props) {
       });
 
       const tl = gsap.timeline({ paused: true });
-      // Visibility flips instantly so backdrop-blur is at full strength for the
-      // whole transition; only the dark tint fades in, not the blur itself.
       tl.set(backdropRef.current, { autoAlpha: 1 }, 0)
         .to(
           backdropRef.current,
@@ -71,7 +60,6 @@ export default function ContactPanel({ open, onClose }: Props) {
     { scope: root },
   );
 
-  // Drive the timeline. Reduced motion jumps straight to the end state.
   useEffect(() => {
     const tl = tlRef.current;
     if (!tl) return;
@@ -83,7 +71,6 @@ export default function ContactPanel({ open, onClose }: Props) {
     else tl.reverse();
   }, [open, reduced]);
 
-  // Close on Escape and lock body scroll while the panel is open.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -124,14 +111,12 @@ export default function ContactPanel({ open, onClose }: Props) {
       style={{ pointerEvents: open ? "auto" : "none" }}
       aria-hidden={!open}
     >
-      {/* Dim the page behind the panel */}
       <div
         ref={backdropRef}
         onClick={onClose}
         className="absolute inset-0 cursor-pointer backdrop-blur-md"
       />
 
-      {/* Right-anchored drawer holding the three sliding layers */}
       <div className="absolute inset-y-0 right-0 w-full max-w-170">
         <div ref={flameRef} className="absolute inset-0 bg-flame" />
         <div ref={inkRef} className="absolute inset-0 bg-ink" />

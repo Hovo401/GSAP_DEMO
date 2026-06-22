@@ -7,7 +7,6 @@ export default function Footer() {
   return (
     <footer className="relative overflow-hidden border-t-2 border-paper/15 bg-ink px-6 pt-16 pb-8 md:px-12">
       <div className="mx-auto max-w-6xl">
-        {/* Top row: identity + back to top */}
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
             <p className="font-display text-3xl uppercase">{brand.name}</p>
@@ -17,7 +16,6 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-10 sm:flex-row sm:gap-16">
-            {/* Sitemap */}
             <nav className="flex flex-col gap-3">
               <p className="text-xs font-medium tracking-[0.3em] text-paper/35 uppercase">
                 Menu
@@ -33,7 +31,6 @@ export default function Footer() {
               ))}
             </nav>
 
-            {/* Social */}
             <nav className="flex flex-col gap-3">
               <p className="text-xs font-medium tracking-[0.3em] text-paper/35 uppercase">
                 Elsewhere
@@ -54,7 +51,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom row */}
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-paper/10 pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-paper/30">
             © {new Date().getFullYear()} {brand.name}. All motion reserved.
@@ -70,7 +66,6 @@ export default function Footer() {
           </button>
         </div>
 
-        {/* Oversized clipped wordmark */}
         <p
           aria-hidden="true"
           className="font-display pointer-events-none mt-10 -mb-[0.18em] w-full text-center text-[24vw] leading-[0.8] text-paper/[0.05] uppercase select-none"

@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { gsap, SplitText, useGSAP } from "../lib/gsap";
 import { cta } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { DURATION, EASE, STAGGER } from "../lib/motion";
 
 export default function CTA() {
   const root = useRef<HTMLElement>(null);
@@ -29,17 +30,19 @@ export default function CTA() {
           {
             yPercent: 110,
             opacity: 0,
-            duration: 0.8,
-            ease: "power4.out",
+            duration: DURATION.medium,
+            ease: EASE.strongOut,
             stagger: 0.03,
           },
           "-=0.2",
         )
         .from(
           ".cta-fade",
-          { y: 24, opacity: 0, duration: 0.6, ease: "power2.out", stagger: 0.1 },
+          { y: 24, opacity: 0, duration: DURATION.base, ease: EASE.softOut, stagger: STAGGER.base },
           "-=0.3",
         );
+
+      return () => split.revert();
     },
     { scope: root, dependencies: [reduced] },
   );

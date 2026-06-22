@@ -1,9 +1,5 @@
 import { useId } from "react";
 
-/**
- * Circular rotating "visit project" badge with an arrow disc in the middle.
- * Mirrors the hover element on blinkpath's work cards.
- */
 export default function VisitBadge({ label = "Visit project" }: { label?: string }) {
   const rawId = useId();
   const pathId = `visit-${rawId.replace(/[^a-zA-Z0-9]/g, "")}`;

@@ -7,15 +7,15 @@ import Marquee from "../sections/Marquee";
 import TextReveal from "../sections/TextReveal";
 import Showcase from "../sections/Showcase";
 import Features from "../sections/Features";
+import StudioCanvas from "../sections/StudioCanvas";
 import Approach from "../sections/Approach";
 import Stats from "../sections/Stats";
 import Pricing from "../sections/Pricing";
 import CTA from "../sections/CTA";
+import MagicReveal from "../sections/MagicReveal";
 import Footer from "../sections/Footer";
 
 export default function Home() {
-  // Fonts change line wrapping / element heights, which shifts every pin point.
-  // Recalculate once the display fonts are ready.
   useEffect(() => {
     document.fonts.ready.then(() => ScrollTrigger.refresh());
   }, []);
@@ -29,10 +29,12 @@ export default function Home() {
       <TextReveal />
       <Showcase />
       <Features />
+      <StudioCanvas />
       <Approach />
       <Stats />
       <Pricing />
       <CTA />
+      <MagicReveal />
       <Footer />
     </div>
   );

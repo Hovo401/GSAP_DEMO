@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "../lib/gsap";
 import { marqueeWords } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { EASE } from "../lib/motion";
 
 export default function Marquee() {
   const root = useRef<HTMLDivElement>(null);
@@ -12,15 +13,13 @@ export default function Marquee() {
     () => {
       if (reduced || !trackRef.current) return;
 
-      // The track holds two identical word-sets; sliding 50% loops seamlessly.
       const loop = gsap.to(trackRef.current, {
         xPercent: -50,
-        ease: "none",
+        ease: EASE.none,
         duration: 18,
         repeat: -1,
       });
 
-      // Scroll velocity briefly speeds up / flips the strip — a brutal staple.
       const st = ScrollTrigger.create({
         trigger: root.current,
         start: "top bottom",
@@ -44,7 +43,6 @@ export default function Marquee() {
       ref={root}
       className="relative overflow-hidden border-y-2 border-paper/20 bg-ink py-6"
     >
-      {/* Edge fades so the strip melts into the background */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-ink to-transparent md:w-40" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-ink to-transparent md:w-40" />
 

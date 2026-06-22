@@ -2,11 +2,6 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "../../lib/gsap";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 
-/**
- * Clean orbital decoration — one solid ring, two overlapping dotted circles,
- * and a dot travelling around each. Strokes use `currentColor`, so set the
- * colour via `className`.
- */
 export default function OrbitDecor({ className = "" }: { className?: string }) {
   const root = useRef<SVGSVGElement>(null);
   const reduced = useReducedMotion();
@@ -35,7 +30,6 @@ export default function OrbitDecor({ className = "" }: { className?: string }) {
 
   return (
     <svg ref={root} viewBox="0 0 400 400" className={className} fill="none">
-      {/* Outer solid ring */}
       <circle
         cx={200}
         cy={200}
@@ -45,7 +39,6 @@ export default function OrbitDecor({ className = "" }: { className?: string }) {
         opacity={0.45}
       />
 
-      {/* Two overlapping dotted circles */}
       <circle
         cx={158}
         cy={205}
@@ -67,7 +60,6 @@ export default function OrbitDecor({ className = "" }: { className?: string }) {
         opacity={0.65}
       />
 
-      {/* Orbiting dots */}
       <g className="orbit-dot-a">
         <circle cx={278} cy={205} r={8} fill="currentColor" />
       </g>
