@@ -119,7 +119,7 @@ export default function Header() {
             <button
               onClick={scrollTop}
               aria-label="Back to top"
-              className="absolute top-1/2 -translate-y-1/2 rounded-full"
+              className="absolute top-1/2 -translate-y-1/2 cursor-pointer rounded-full"
               style={{ left: HOME_LEFT, width: DOT_SIZE, height: DOT_SIZE }}
             />
 
@@ -148,7 +148,7 @@ export default function Header() {
                     itemRefs.current[i] = el;
                   }}
                   onClick={() => (isContact ? openContact() : goTo(item.href!))}
-                  className={`relative z-10 mx-0.5 flex h-10 items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
+                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
                 >
                   {/* Roll-up label: hovering reveals a flame-colored copy */}
                   <span
@@ -179,7 +179,7 @@ export default function Header() {
         <div className="pointer-events-auto ml-auto md:hidden">
           <button
             onClick={() => setMobileOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-white/90 px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-xl"
+            className="flex cursor-pointer items-center gap-2 rounded-full bg-white/90 px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-xl"
           >
             <span className="h-2 w-2 rounded-full bg-flame" />
             Menu
@@ -206,7 +206,7 @@ export default function Header() {
               </span>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="text-sm font-medium text-ink/50 hover:text-ink"
+                className="cursor-pointer text-sm font-medium text-ink/50 hover:text-ink"
               >
                 Close
               </button>
@@ -219,7 +219,7 @@ export default function Header() {
                   onClick={() =>
                     item.panel === "contact" ? openContact() : goTo(item.href!)
                   }
-                  className={`rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
+                  className={`cursor-pointer rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
                     activeIndex === i
                       ? "bg-flame text-white"
                       : "text-ink/80 hover:bg-black/5"

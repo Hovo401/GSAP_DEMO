@@ -28,13 +28,23 @@ export default function ContactPanel({ open, onClose }: Props) {
   // Build the open/close timeline once; play/reverse it as `open` flips.
   useGSAP(
     () => {
-      gsap.set(backdropRef.current, { autoAlpha: 0 });
+      gsap.set(backdropRef.current, {
+        autoAlpha: 0,
+        backgroundColor: "rgba(0,0,0,0)",
+      });
       gsap.set([flameRef.current, inkRef.current, formRef.current], {
         xPercent: 100,
       });
 
       const tl = gsap.timeline({ paused: true });
-      tl.to(backdropRef.current, { autoAlpha: 1, duration: 0.4 }, 0)
+      // Visibility flips instantly so backdrop-blur is at full strength for the
+      // whole transition; only the dark tint fades in, not the blur itself.
+      tl.set(backdropRef.current, { autoAlpha: 1 }, 0)
+        .to(
+          backdropRef.current,
+          { backgroundColor: "rgba(0,0,0,0.55)", duration: 0.4 },
+          0,
+        )
         .to(
           flameRef.current,
           { xPercent: 0, duration: 0.6, ease: "power3.out" },
@@ -110,7 +120,7 @@ export default function ContactPanel({ open, onClose }: Props) {
   return (
     <div
       ref={root}
-      className="fixed inset-0 z-[60]"
+      className="fixed inset-0 z-60"
       style={{ pointerEvents: open ? "auto" : "none" }}
       aria-hidden={!open}
     >
@@ -118,11 +128,11 @@ export default function ContactPanel({ open, onClose }: Props) {
       <div
         ref={backdropRef}
         onClick={onClose}
-        className="absolute inset-0 bg-black/55"
+        className="absolute inset-0 cursor-pointer backdrop-blur-md"
       />
 
       {/* Right-anchored drawer holding the three sliding layers */}
-      <div className="absolute inset-y-0 right-0 w-full max-w-[680px]">
+      <div className="absolute inset-y-0 right-0 w-full max-w-170">
         <div ref={flameRef} className="absolute inset-0 bg-flame" />
         <div ref={inkRef} className="absolute inset-0 bg-ink" />
 
@@ -142,7 +152,7 @@ export default function ContactPanel({ open, onClose }: Props) {
               <button
                 onClick={onClose}
                 aria-label="Close contact panel"
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-black/20 text-black/60 transition-colors hover:bg-black/5 hover:text-ink"
+                className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/20 text-black/60 transition-colors hover:bg-black/5 hover:text-ink"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <path
@@ -197,7 +207,7 @@ export default function ContactPanel({ open, onClose }: Props) {
 
               <button
                 type="submit"
-                className="contact-stagger group mt-1 inline-flex w-fit items-center gap-3 rounded-full border border-flame px-7 py-4 text-[17px] font-medium text-flame transition-colors hover:bg-flame hover:text-white"
+                className="contact-stagger group mt-1 inline-flex w-fit cursor-pointer items-center gap-3 rounded-full border border-flame px-7 py-4 text-[17px] font-medium text-flame transition-colors hover:bg-flame hover:text-white"
               >
                 <span className="h-3 w-3 rounded-full bg-flame transition-colors group-hover:bg-white" />
                 {copy.submit}
