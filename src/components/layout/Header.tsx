@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { nav as navItems } from "../../content/site";
+import ContactPanel from "../ui/ContactPanel";
 
 // Home position of the flame indicator: a lone dot sitting just left of the pill.
 const HOME_LEFT = -46;
@@ -26,10 +27,10 @@ export default function Header() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [pill, setPill] = useState<Pill>({ ...HOME_PILL, opacity: 0 });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const contactIndex = navItems.length - 1;
 
   // Place the flame indicator: a left dot when idle, a pill behind the active item.
   const updateIndicator = useCallback(() => {
@@ -61,6 +62,7 @@ export default function Header() {
     const onScroll = () => {
       let current: number | null = null;
       navItems.forEach((item, i) => {
+        if (!item.href) return; // Contact opens a panel, not a scroll target.
         const el = document.querySelector(item.href);
         if (el && el.getBoundingClientRect().top <= TRIGGER) current = i;
       });
@@ -87,6 +89,10 @@ export default function Header() {
   const goTo = (href: string) => {
     setMobileOpen(false);
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+  };
+  const openContact = () => {
+    setMobileOpen(false);
+    setContactOpen(true);
   };
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -134,14 +140,14 @@ export default function Header() {
 
             {navItems.map((item, i) => {
               const active = activeIndex === i;
-              const isContact = i === contactIndex;
+              const isContact = item.panel === "contact";
               return (
                 <button
                   key={item.label}
                   ref={(el) => {
                     itemRefs.current[i] = el;
                   }}
-                  onClick={() => goTo(item.href)}
+                  onClick={() => (isContact ? openContact() : goTo(item.href!))}
                   className={`relative z-10 mx-0.5 flex h-10 items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
                 >
                   {/* Roll-up label: hovering reveals a flame-colored copy */}
@@ -210,11 +216,13 @@ export default function Header() {
               {navItems.map((item, i) => (
                 <button
                   key={item.label}
-                  onClick={() => goTo(item.href)}
+                  onClick={() =>
+                    item.panel === "contact" ? openContact() : goTo(item.href!)
+                  }
                   className={`rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
                     activeIndex === i
                       ? "bg-flame text-white"
-                      : "text-ink/80 hover:bg-black/[0.05]"
+                      : "text-ink/80 hover:bg-black/5"
                   }`}
                 >
                   {item.label}
@@ -224,6 +232,9 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* ── CONTACT PANEL (layered slide-in) ── */}
+      <ContactPanel open={contactOpen} onClose={() => setContactOpen(false)} />
     </>
   );
 }

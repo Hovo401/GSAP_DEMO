@@ -6,13 +6,35 @@ export const brand = {
 };
 
 // Menu concept from blinkpath.com — the orange "M" dot acts as Home.
-export const nav = [
+// Contact is not a scroll target: it opens the layered side panel instead.
+export type NavItem = { label: string; href?: string; panel?: "contact" };
+
+export const nav: NavItem[] = [
   { label: "Work", href: "#showcase" },
   { label: "Services", href: "#features" },
   { label: "Approach", href: "#approach" },
   { label: "About", href: "#stats" },
-  { label: "Contact", href: "#cta" },
+  { label: "Contact", panel: "contact" },
 ];
+
+// Copy for the slide-in Contact panel.
+export const contactPanel = {
+  eyebrow: "Contact us",
+  title: "Have a project you’d like to talk about?",
+  fields: {
+    name: { label: "What is your name?", placeholder: "Full Name" },
+    email: { label: "What is your email?", placeholder: "Email Address" },
+    company: {
+      label: "What is the name of your company?",
+      placeholder: "Company Name",
+    },
+    message: {
+      label: "Tell us a bit more about your project",
+      placeholder: "We are looking to…",
+    },
+  },
+  submit: "Send message",
+};
 
 export const hero = {
   kicker: "Motion design engine",
