@@ -1,29 +1,18 @@
 import { useRef } from "react";
-import { gsap, useGSAP } from "../lib/gsap";
 import { pricing } from "../content/site";
-import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScrollReveal } from "../hooks/useScrollReveal";
+import { DURATION, STAGGER } from "../lib/motion";
 
 export default function Pricing() {
   const root = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
-      if (reduced) return;
-      gsap.from(".price-card", {
-        y: 60,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out",
-        stagger: 0.12,
-        // Clear the inline transform afterwards so the CSS :hover lift and the
-        // featured card's baseline offset aren't pinned by GSAP's leftover style.
-        clearProps: "transform",
-        scrollTrigger: { trigger: ".price-grid", start: "top 80%" },
-      });
-    },
-    { scope: root, dependencies: [reduced] },
-  );
+  useScrollReveal(root, ".price-card", {
+    y: 60,
+    duration: DURATION.medium,
+    stagger: STAGGER.loose,
+    clearProps: "transform",
+    trigger: ".price-grid",
+  });
 
   return (
     <section id="pricing" ref={root} className="bg-ink px-6 py-28 md:px-12">

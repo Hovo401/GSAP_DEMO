@@ -1,50 +1,46 @@
 import { useRef } from "react";
-import { gsap, SplitText, useGSAP } from "../lib/gsap";
+import { gsap, useGSAP } from "../lib/gsap";
 import { hero, brand } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useSplitReveal } from "../hooks/useSplitReveal";
+import { DURATION, EASE, STAGGER } from "../lib/motion";
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
+  const titleRef = useSplitReveal<HTMLHeadingElement>("lines,words", "words", {
+    yPercent: 120,
+    opacity: 0,
+    duration: DURATION.slower,
+    ease: EASE.strongOut,
+    stagger: STAGGER.tight,
+    delay: 0.15,
+  });
+
   useGSAP(
     () => {
-      if (reduced || !titleRef.current) return;
+      if (reduced || !contentRef.current) return;
 
-      // Brutal meta labels in the corners settle in first.
       gsap.from(".hero-meta", {
         opacity: 0,
-        duration: 1,
-        ease: "power2.out",
-        stagger: 0.1,
+        duration: DURATION.slower,
+        ease: EASE.softOut,
+        stagger: STAGGER.base,
         delay: 0.2,
       });
 
-      // Word-by-word entrance for the headline.
-      const split = new SplitText(titleRef.current, { type: "lines,words" });
-      gsap.from(split.words, {
-        yPercent: 120,
-        opacity: 0,
-        duration: 1,
-        ease: "power4.out",
-        stagger: 0.08,
-        delay: 0.15,
-      });
-
-      // The kicker / subtitle fade up under it.
       gsap.from(".hero-fade", {
         y: 24,
         opacity: 0,
-        duration: 0.9,
-        ease: "power3.out",
-        stagger: 0.12,
+        duration: DURATION.slow,
+        ease: EASE.out,
+        stagger: STAGGER.loose,
         delay: 0.5,
       });
 
-      // Ambient glows breathe slowly behind the headline.
       gsap.to(".hero-glow", {
         scale: 1.18,
         opacity: 0.85,
@@ -55,7 +51,6 @@ export default function Hero() {
         stagger: 1.4,
       });
 
-      // Pin the hero and let the content drift up + dim as you scroll past.
       gsap.to(contentRef.current, {
         yPercent: -18,
         scale: 0.92,
@@ -70,7 +65,6 @@ export default function Hero() {
         },
       });
 
-      // Looping nudge on the scroll hint.
       gsap.to(hintRef.current, {
         y: 10,
         repeat: -1,
@@ -101,13 +95,11 @@ export default function Hero() {
       id="home"
       className="relative flex h-screen items-center justify-center overflow-hidden bg-ink px-6"
     >
-      {/* Ambient flame glows behind the headline */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="hero-glow glow absolute top-1/4 left-1/4 h-[40vw] w-[40vw] opacity-50" />
         <div className="hero-glow glow absolute right-1/4 bottom-1/4 h-[32vw] w-[32vw] opacity-40" />
       </div>
 
-      {/* Faint structural grid for depth */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
@@ -121,7 +113,6 @@ export default function Hero() {
         }}
       />
 
-      {/* Brutal corner meta labels */}
       <span className="hero-meta absolute top-24 left-6 hidden text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:left-10">
         Est. 2026
       </span>

@@ -1,36 +1,26 @@
 import { useRef } from "react";
-import { gsap, useGSAP } from "../lib/gsap";
 import { features } from "../content/site";
-import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScramble } from "../hooks/useScramble";
+import { useScrollReveal } from "../hooks/useScrollReveal";
+import { DURATION, STAGGER, SCROLL_START } from "../lib/motion";
 
 export default function Features() {
   const root = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
+  const headingRef = useScramble<HTMLHeadingElement>("Built to move");
 
-  useGSAP(
-    () => {
-      if (reduced) return;
+  useScrollReveal(root, ".feature-heading", {
+    duration: DURATION.medium,
+    trigger: root,
+    start: SCROLL_START.late,
+  });
 
-      gsap.from(".feature-heading", {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: { trigger: root.current, start: "top 75%" },
-      });
-
-      gsap.from(".feature-card", {
-        yPercent: 30,
-        opacity: 0,
-        clipPath: "inset(100% 0 0 0)",
-        duration: 0.9,
-        ease: "power3.out",
-        stagger: 0.12,
-        scrollTrigger: { trigger: ".feature-grid", start: "top 80%" },
-      });
-    },
-    { scope: root, dependencies: [reduced] },
-  );
+  useScrollReveal(root, ".feature-card", {
+    yPercent: 30,
+    clipPath: "inset(100% 0 0 0)",
+    duration: DURATION.slow,
+    stagger: STAGGER.loose,
+    trigger: ".feature-grid",
+  });
 
   return (
     <section
@@ -45,7 +35,10 @@ export default function Features() {
               <span className="h-px w-8 bg-flame/60" />
               What it does
             </p>
-            <h2 className="font-display mt-3 text-6xl leading-none uppercase md:text-8xl">
+            <h2
+              ref={headingRef}
+              className="font-display mt-3 text-6xl leading-none uppercase md:text-8xl"
+            >
               Built to move
             </h2>
           </div>
@@ -60,7 +53,6 @@ export default function Features() {
               key={f.no}
               className="feature-card group relative overflow-hidden border-2 border-paper/20 bg-ink p-8 transition-colors duration-300 hover:border-flame md:p-10"
             >
-              {/* Ghost watermark number */}
               <span className="font-display pointer-events-none absolute -top-6 -right-2 text-[8rem] leading-none text-paper/[0.04] transition-colors duration-300 select-none group-hover:text-flame/10 md:text-[10rem]">
                 {f.no}
               </span>
@@ -78,7 +70,6 @@ export default function Features() {
                 {f.body}
               </p>
 
-              {/* Accent underline grows on hover */}
               <span className="absolute bottom-0 left-0 h-[3px] w-0 bg-flame transition-all duration-300 ease-out group-hover:w-full" />
             </article>
           ))}

@@ -5,11 +5,6 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 const COLUMNS = 6;
 
-/**
- * Full-screen brutal intro. The brand word builds up while a counter runs
- * 0 → 100, then the cover splits into vertical columns that slide up to
- * reveal the page underneath.
- */
 export default function Preloader() {
   const root = useRef<HTMLDivElement>(null);
   const wordRef = useRef<HTMLHeadingElement>(null);
@@ -19,7 +14,6 @@ export default function Preloader() {
 
   useGSAP(
     () => {
-      // Reduced motion: skip the show entirely.
       if (reduced) {
         setDone(true);
         return;
@@ -62,13 +56,11 @@ export default function Preloader() {
           },
           "<",
         )
-        // Lift the content off-screen.
         .to(
           ".loader-content",
           { yPercent: -115, duration: 0.6, ease: "power3.in" },
           "+=0.25",
         )
-        // Curtain reveal: columns slide up one after another.
         .to(
           ".loader-col",
           { yPercent: -100, duration: 0.7, ease: "power4.inOut", stagger: 0.08 },
@@ -82,14 +74,12 @@ export default function Preloader() {
 
   return (
     <div ref={root} className="fixed inset-0 z-[100]">
-      {/* Column cover */}
       <div className="absolute inset-0 flex">
         {Array.from({ length: COLUMNS }).map((_, i) => (
           <div key={i} className="loader-col h-full flex-1 bg-ink" />
         ))}
       </div>
 
-      {/* Content layer */}
       <div className="loader-content absolute inset-0 flex flex-col items-center justify-center px-6">
         <div className="overflow-hidden pb-[0.12em]">
           <h1
@@ -103,7 +93,6 @@ export default function Preloader() {
           {brand.tagline}
         </p>
 
-        {/* Counter + progress line */}
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-6 md:px-12">
           <span className="text-xs font-medium tracking-[0.3em] text-paper/40 uppercase">
             Loading

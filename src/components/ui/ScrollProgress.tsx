@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "../../lib/gsap";
 
-/** Thin top progress bar tied to total page scroll. */
 export default function ScrollProgress() {
   const barRef = useRef<HTMLDivElement>(null);
 

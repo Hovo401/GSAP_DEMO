@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 
-/**
- * Reports whether the user prefers reduced motion.
- * Use it to skip scroll-jacking / heavy animation and show content immediately.
- */
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
 

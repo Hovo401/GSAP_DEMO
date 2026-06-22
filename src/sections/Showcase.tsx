@@ -1,20 +1,25 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { gsap, useGSAP } from "../lib/gsap";
 import { showcase, showcaseIntro } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import VisitBadge from "../components/ui/VisitBadge";
+import { useScramble } from "../hooks/useScramble";
+import { CaseOverlay } from "./showcase/CaseOverlay";
+import type { Project } from "./showcase/types";
 
 export default function Showcase() {
   const root = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
+  const introHeadingRef = useScramble<HTMLHeadingElement>(showcaseIntro.title);
+
+  const cardRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [active, setActive] = useState<Project | null>(null);
 
   useGSAP(
     () => {
       const track = trackRef.current;
       if (!track) return;
 
-      // Vertical scroll drives horizontal travel of the card track.
       const distance = () => track.scrollWidth - window.innerWidth;
 
       const horizontal = gsap.to(track, {
@@ -32,7 +37,6 @@ export default function Showcase() {
 
       if (reduced) return;
 
-      // Each card's content rises in as the card swings through view.
       gsap.utils.toArray<HTMLElement>(".showcase-card").forEach((card) => {
         const items = card.querySelectorAll(".card-reveal");
         gsap.fromTo(
@@ -67,12 +71,14 @@ export default function Showcase() {
         ref={trackRef}
         className="flex h-screen w-max items-center will-change-transform"
       >
-        {/* Intro panel */}
         <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
           <p className="text-sm font-medium tracking-[0.4em] text-flame uppercase">
             {showcaseIntro.kicker}
           </p>
-          <h2 className="font-display mt-4 text-[18vw] leading-[0.85] uppercase md:text-[9vw]">
+          <h2
+            ref={introHeadingRef}
+            className="font-display mt-4 text-[18vw] leading-[0.85] uppercase md:text-[9vw]"
+          >
             {showcaseIntro.title}
           </h2>
           <p className="mt-8 max-w-md text-lg font-light text-paper/60">
@@ -84,17 +90,23 @@ export default function Showcase() {
           </p>
         </div>
 
-        {/* Project cards */}
         {showcase.map((item) => (
           <article
             key={item.no}
             className="showcase-card group flex h-full w-[82vw] shrink-0 items-center px-3 sm:w-[58vw] md:w-[34vw]"
           >
-            <div className="relative flex h-[74vh] w-full flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10">
-              {/* Flame wash that fades in on hover */}
+            <button
+              type="button"
+              data-magnetic
+              ref={(el) => {
+                cardRefs.current[item.no] = el;
+              }}
+              onClick={() => setActive(item)}
+              aria-label={`Open ${item.title} case study`}
+              className="relative flex h-[74vh] w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
+            >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-              {/* Giant index watermark */}
               <span className="font-display pointer-events-none absolute -bottom-8 -left-2 text-[12rem] leading-none text-paper/[0.03] select-none">
                 {item.no}
               </span>
@@ -113,16 +125,10 @@ export default function Showcase() {
               <p className="card-reveal relative mt-auto max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
                 {item.body}
               </p>
-
-              {/* Rotating "visit project" badge surfaces on hover */}
-              <div className="pointer-events-none absolute right-6 bottom-6 scale-75 opacity-0 transition-all duration-300 ease-out group-hover:scale-100 group-hover:opacity-100">
-                <VisitBadge />
-              </div>
-            </div>
+            </button>
           </article>
         ))}
 
-        {/* Closing CTA panel */}
         <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
           <h2 className="font-display text-[14vw] leading-[0.85] uppercase md:text-[7vw]">
             Want
@@ -137,6 +143,15 @@ export default function Showcase() {
           </a>
         </div>
       </div>
+
+      {active && (
+        <CaseOverlay
+          item={active}
+          sourceEl={cardRefs.current[active.no] ?? null}
+          reduced={reduced}
+          onClose={() => setActive(null)}
+        />
+      )}
     </section>
   );
 }

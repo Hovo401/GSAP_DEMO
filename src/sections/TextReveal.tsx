@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { gsap, SplitText, useGSAP } from "../lib/gsap";
 import { manifesto } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { EASE } from "../lib/motion";
 
 export default function TextReveal() {
   const root = useRef<HTMLElement>(null);
@@ -14,13 +15,12 @@ export default function TextReveal() {
 
       const split = new SplitText(textRef.current, { type: "words" });
 
-      // Words start dim and brighten word-by-word as the pinned section scrolls.
       gsap.fromTo(
         split.words,
         { opacity: 0.15 },
         {
           opacity: 1,
-          ease: "none",
+          ease: EASE.none,
           stagger: 0.5,
           scrollTrigger: {
             trigger: root.current,
@@ -31,6 +31,8 @@ export default function TextReveal() {
           },
         },
       );
+
+      return () => split.revert();
     },
     { scope: root, dependencies: [reduced] },
   );

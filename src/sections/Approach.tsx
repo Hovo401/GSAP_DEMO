@@ -13,13 +13,9 @@ export default function Approach() {
       if (reduced) return;
 
       const cards = gsap.utils.toArray<HTMLElement>(".approach-card");
-      const peek = 52; // px of each card left visible above the next one
+      const peek = 52;
 
       cards.forEach((card, i) => {
-        // Pin each card a little lower than the last so the previous card's
-        // rounded top stays visible as a band; later cards (higher z-index)
-        // slide up and cover everything below their top edge. No scaling —
-        // the cards keep their exact shape.
         ScrollTrigger.create({
           trigger: card,
           start: () => `top top+=${i * peek}`,
@@ -35,9 +31,6 @@ export default function Approach() {
   );
 
   return (
-    // pb gives the LAST card enough scroll runway to finish rising and fully
-    // cover the previous one (leaving just its peek), then rest a beat before
-    // the section releases. Stats below is also cream, so it blends seamlessly.
     <section
       id="approach"
       ref={root}
@@ -51,7 +44,6 @@ export default function Approach() {
             className="approach-card relative h-[64vh] px-3 pt-32 md:px-10"
             style={{ zIndex: i + 1 }}
           >
-            {/* Inset card floating on the light frame */}
             <div
               className={`card-bg relative mx-auto flex h-[calc(64vh-6.5rem)] w-full max-w-[1500px] flex-col overflow-hidden rounded-[2.5rem] px-8 py-12 md:px-16 md:py-14 ${
                 dark ? "bg-ink text-paper" : "bg-flame text-paper"
