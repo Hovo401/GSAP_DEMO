@@ -5,13 +5,13 @@ import type { Pt, Note, Link, Page } from "./types";
 export const CANVAS_W = 1700;
 export const CANVAS_H = 1150;
 
-export function makeFirstPage(): Page {
-  return {
-    id: "page-1",
-    name: "Page 1",
-    notes: studio.nodes.map((n) => ({ ...n })),
-    links: studio.links.map((l, i) => ({ id: `seed-${i}`, ...l })),
-  };
+export function makeSeedPages(): Page[] {
+  return studio.pages.map((page) => ({
+    id: page.id,
+    name: page.name,
+    notes: page.nodes.map((n) => ({ ...n })),
+    links: page.links.map((l, i) => ({ id: `${page.id}-seed-${i}`, ...l })),
+  }));
 }
 
 export function centerOf(el: Element, board: HTMLElement): Pt {

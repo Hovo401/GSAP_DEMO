@@ -21,6 +21,7 @@ type BoardProps = {
   pendingRef: RefObject<SVGPathElement | null>;
   onWireEnter: (linkId: string, path: SVGPathElement) => void;
   clearHoverDelete: () => void;
+  keepHoverDelete: () => void;
   handleDeleteLink: (id: string) => void;
   openEdit: (node: Note) => void;
   handleDeleteNote: (id: string) => void;
@@ -45,6 +46,7 @@ export function renderBoard(props: BoardProps) {
     pendingRef,
     onWireEnter,
     clearHoverDelete,
+    keepHoverDelete,
     handleDeleteLink,
     openEdit,
     handleDeleteNote,
@@ -103,6 +105,7 @@ export function renderBoard(props: BoardProps) {
           type="button"
           aria-label={studio.deleteLabel}
           onClick={() => handleDeleteLink(hoverDelete.id)}
+          onPointerEnter={keepHoverDelete}
           onMouseLeave={clearHoverDelete}
           style={{ left: hoverDelete.x, top: hoverDelete.y }}
           className="absolute z-30 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-flame bg-ink text-xs text-flame hover:bg-flame hover:text-ink"

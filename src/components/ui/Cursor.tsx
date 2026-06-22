@@ -34,7 +34,16 @@ export default function Cursor() {
 
       let magnet: HTMLElement | null = null;
 
-      const setCursorState = (state: "card" | "target" | "default") => {
+      const setCursorState = (state: "card" | "target" | "default" | "hidden") => {
+        if (state === "hidden") {
+          gsap.to([dot, badge], {
+            scale: 0,
+            autoAlpha: 0,
+            duration: 0.25,
+            ease: "power3.out",
+          });
+          return;
+        }
         if (state === "card") {
           gsap.to(dot, {
             scale: 0,
@@ -82,7 +91,12 @@ export default function Cursor() {
           "[data-magnetic], a, button",
         );
         const card = (e.target as HTMLElement)?.closest(".showcase-card");
-        if (card) {
+        const studioNode = (e.target as HTMLElement)?.closest(".studio-stage");
+        if (studioNode) {
+          setOnCard(false);
+          magnet = null;
+          setCursorState("hidden");
+        } else if (card) {
           setOnCard(true);
           magnet = null;
           setCursorState("card");
