@@ -233,21 +233,18 @@ export default function StudioCanvas() {
 
   const handleResetPage = () => {
     const page = activePage;
-    const seed = page.origin
-      ? studio.pages.find((sp) => sp.id === page.origin)
-      : undefined;
+    const seed = studio.pages.find((sp) => sp.id === page.origin);
+    if (!seed) return;
     const next = pagesRef.current.map((p) =>
       p.id !== page.id
         ? p
-        : seed
-          ? {
-              ...p,
-              width: seed.width,
-              height: seed.height,
-              notes: seed.nodes.map((n) => ({ ...n })),
-              links: seed.links.map((l, i) => ({ id: `${seed.id}-seed-${i}`, ...l })),
-            }
-          : { ...p, notes: [], links: [] },
+        : {
+            ...p,
+            width: seed.width,
+            height: seed.height,
+            notes: seed.nodes.map((n) => ({ ...n })),
+            links: seed.links.map((l, i) => ({ id: `${seed.id}-seed-${i}`, ...l })),
+          },
     );
     pagesRef.current = next;
     setPages(next);
@@ -334,7 +331,7 @@ export default function StudioCanvas() {
 
       <div
         ref={stageRef}
-        className="studio-stage relative mx-auto h-[80vh] w-full max-w-7xl overflow-hidden rounded-3xl border-2 border-paper/15 bg-[#101010]"
+        className="studio-stage relative mx-auto h-[60vh] w-full max-w-7xl overflow-hidden rounded-3xl border-2 border-paper/15 bg-[#101010] md:h-[80vh]"
       >
         {reduced ? (
           <>
@@ -374,14 +371,16 @@ export default function StudioCanvas() {
           </>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={handleResetPage}
-              aria-label={studio.resetLabel}
-              className="absolute top-5 right-5 z-30 cursor-pointer rounded-full border border-paper/20 bg-ink/60 px-4 py-1.5 text-xs font-medium tracking-[0.15em] text-paper/70 uppercase backdrop-blur-sm hover:border-flame hover:text-flame"
-            >
-              {studio.resetLabel}
-            </button>
+            {activePage.origin && (
+              <button
+                type="button"
+                onClick={handleResetPage}
+                aria-label={studio.resetLabel}
+                className="absolute top-5 right-5 z-30 cursor-pointer rounded-full border border-paper/20 bg-ink/60 px-4 py-1.5 text-xs font-medium tracking-[0.15em] text-paper/70 uppercase backdrop-blur-sm hover:border-flame hover:text-flame"
+              >
+                {studio.resetLabel}
+              </button>
+            )}
 
             <div ref={zoomLayerRef} className="absolute inset-0 origin-top-left">
               <div
