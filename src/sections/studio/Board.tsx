@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { studio, type StudioNode } from "../../content/site";
-import { CANVAS_W, CANVAS_H, hasInput, hasOutput } from "./geometry";
+import { hasInput, hasOutput } from "./geometry";
 import type { Note, Link } from "./types";
 
 export const KIND_META: Record<StudioNode["kind"], { label: string; color: string }> = {
@@ -12,6 +12,8 @@ export const KIND_META: Record<StudioNode["kind"], { label: string; color: strin
 type BoardProps = {
   notes: Note[];
   links: Link[];
+  width: number;
+  height: number;
   interactive: boolean;
   editingId: string | null;
   draft: { label: string; sub: string };
@@ -21,6 +23,7 @@ type BoardProps = {
   pendingRef: RefObject<SVGPathElement | null>;
   onWireEnter: (linkId: string, path: SVGPathElement) => void;
   clearHoverDelete: () => void;
+  keepHoverDelete: () => void;
   handleDeleteLink: (id: string) => void;
   openEdit: (node: Note) => void;
   handleDeleteNote: (id: string) => void;
@@ -36,6 +39,8 @@ export function renderBoard(props: BoardProps) {
   const {
     notes,
     links,
+    width,
+    height,
     interactive,
     editingId,
     draft,
@@ -45,6 +50,7 @@ export function renderBoard(props: BoardProps) {
     pendingRef,
     onWireEnter,
     clearHoverDelete,
+    keepHoverDelete,
     handleDeleteLink,
     openEdit,
     handleDeleteNote,
@@ -57,8 +63,8 @@ export function renderBoard(props: BoardProps) {
     <>
       <svg
         className="pointer-events-none absolute top-0 left-0"
-        width={interactive ? CANVAS_W : "100%"}
-        height={interactive ? CANVAS_H : "100%"}
+        width={interactive ? width : "100%"}
+        height={interactive ? height : "100%"}
       >
         {links.map((link) => (
           <path
@@ -103,6 +109,7 @@ export function renderBoard(props: BoardProps) {
           type="button"
           aria-label={studio.deleteLabel}
           onClick={() => handleDeleteLink(hoverDelete.id)}
+          onPointerEnter={keepHoverDelete}
           onMouseLeave={clearHoverDelete}
           style={{ left: hoverDelete.x, top: hoverDelete.y }}
           className="absolute z-30 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-flame bg-ink text-xs text-flame hover:bg-flame hover:text-ink"
@@ -151,7 +158,7 @@ function renderNote(
       className={`studio-node absolute z-10 ${
         interactive ? "cursor-grab touch-none active:cursor-grabbing" : ""
       }`}
-      style={{ left: `${node.x}%`, top: `${node.y}%` }}
+      style={{ left: `${node.x}px`, top: `${node.y}px` }}
     >
       <div className="node-card relative w-44 rounded-xl border border-paper/20 bg-[#191919] px-5 py-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] md:w-52">
         {interactive && !isEditing && (

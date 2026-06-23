@@ -3,37 +3,58 @@ import { toPng } from "html-to-image";
 import type { Draggable } from "../lib/gsap";
 import { studio } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { CANVAS_W, CANVAS_H, makeFirstPage, drawWires } from "./studio/geometry";
+import {
+  ZOOM_MIN,
+  ZOOM_MAX,
+  ZOOM_STEP,
+  canvasSize,
+  makeSeedPages,
+  drawWires,
+} from "./studio/geometry";
 import { renderBoard } from "./studio/Board";
 import { useStudioDraggable } from "./studio/useStudioDraggable";
 import type { Note, Page, Pt } from "./studio/types";
+
+const seedPageIds = new Set(studio.pages.map((p) => p.id));
 
 export default function StudioCanvas() {
   const root = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const zoomLayerRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
+  const watermarkRef = useRef<HTMLSpanElement>(null);
   const pendingRef = useRef<SVGPathElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const wireRefs = useRef<Record<string, SVGPathElement | null>>({});
   const hitRefs = useRef<Record<string, SVGPathElement | null>>({});
   const dragInstRef = useRef<Record<string, Draggable>>({});
-  // Per-node cumulative GSAP x/y already folded into page state, so each new
-  // commit only applies the delta since the last one (not the full total).
   const lastPosRef = useRef<Record<string, Pt>>({});
 
   const reduced = useReducedMotion();
 
-  const [pages, setPages] = useState<Page[]>(() => [makeFirstPage()]);
-  const [activePageId, setActivePageId] = useState("page-1");
+  const [pages, setPages] = useState<Page[]>(() => makeSeedPages());
+  const [activePageId, setActivePageId] = useState(studio.pages[0].id);
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(zoom);
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState({ label: "", sub: "" });
-  const [hoverDelete, setHoverDelete] = useState<{ id: string; x: number; y: number } | null>(
-    null,
-  );
+  const [hoverDelete, setHoverDelete] = useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const hoverDeleteTimer = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (hoverDeleteTimer.current !== null)
+        globalThis.clearTimeout(hoverDeleteTimer.current);
+    };
+  }, []);
 
-  // Kept in sync after every render so imperative GSAP callbacks (which don't
-  // re-bind on every state change) can always read the latest snapshot.
   const pagesRef = useRef(pages);
   const activePageIdRef = useRef(activePageId);
   useEffect(() => {
@@ -45,13 +66,13 @@ export default function StudioCanvas() {
 
   const activePage = pages.find((p) => p.id === activePageId) ?? pages[0];
   const noteIds = activePage.notes.map((n) => n.id).join(",");
+  const { w: canvasW, h: canvasH } = canvasSize(activePage);
 
-  // Apply a mutation to the active page. Editing page 1 (the original
-  // example) forks a new page instead of touching it, so the example stays
-  // intact; every other page is mutated in place. Reads/writes go through
-  // refs so back-to-back calls between renders never see stale state.
   function withActivePage(
-    mutator: (notes: Note[], links: Page["links"]) => { notes: Note[]; links: Page["links"] },
+    mutator: (
+      notes: Note[],
+      links: Page["links"],
+    ) => { notes: Note[]; links: Page["links"] },
   ) {
     const prev = pagesRef.current;
     const id = activePageIdRef.current;
@@ -62,9 +83,20 @@ export default function StudioCanvas() {
 
     let next: Page[];
     let nextActiveId = id;
-    if (page.id === "page-1") {
+    if (seedPageIds.has(page.id)) {
       nextActiveId = crypto.randomUUID();
-      next = [...prev, { id: nextActiveId, name: `Page ${prev.length + 1}`, notes, links }];
+      next = [
+        ...prev,
+        {
+          id: nextActiveId,
+          name: `Page ${prev.length + 1}`,
+          width: page.width,
+          height: page.height,
+          origin: page.origin ?? page.id,
+          notes,
+          links,
+        },
+      ];
     } else {
       next = prev.map((p, i) => (i === idx ? { ...p, notes, links } : p));
     }
@@ -79,7 +111,9 @@ export default function StudioCanvas() {
     scope: root,
     stageRef,
     canvasRef,
+    zoomLayerRef,
     bgRef,
+    watermarkRef,
     pendingRef,
     hintRef,
     wireRefs,
@@ -87,18 +121,21 @@ export default function StudioCanvas() {
     dragInstRef,
     lastPosRef,
     pagesRef,
-    activePageIdRef,
     reduced,
     activePageId,
     noteIds,
     activePage,
+    zoom,
+    zoomRef,
     setPages,
     withActivePage,
   });
 
-  // While a note is being edited, fully disable its Draggable — GSAP's own
-  // "ignore clicks on form elements" heuristic isn't reliable enough across
-  // browsers to guarantee the input can be focused and typed into.
+  const handleZoomIn = () =>
+    setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100));
+  const handleZoomOut = () =>
+    setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100));
+
   useEffect(() => {
     Object.entries(dragInstRef.current).forEach(([id, inst]) => {
       if (id === editingId) inst.disable();
@@ -106,17 +143,23 @@ export default function StudioCanvas() {
     });
   }, [editingId]);
 
-  // Keep wires drawn whenever the active page's link list changes (add/delete).
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || reduced) return;
-    drawWires(canvas, wireRefs.current, hitRefs.current, activePage.links);
+    drawWires(canvas, wireRefs.current, hitRefs.current, activePage.links, zoomRef.current);
   }, [activePage.links, activePageId, reduced]);
 
   const onWireEnter = (linkId: string, path: SVGPathElement) => {
+    keepHoverDelete();
     const len = path.getTotalLength();
     const pt = path.getPointAtLength(len / 2);
     setHoverDelete({ id: linkId, x: pt.x, y: pt.y });
+  };
+
+  const keepHoverDelete = () => {
+    if (hoverDeleteTimer.current === null) return;
+    globalThis.clearTimeout(hoverDeleteTimer.current);
+    hoverDeleteTimer.current = null;
   };
 
   const openEdit = (node: Note) => {
@@ -124,14 +167,17 @@ export default function StudioCanvas() {
     setEditingId(node.id);
   };
 
-  const updateDraftLabel = (label: string) => setDraft((d) => ({ ...d, label }));
+  const updateDraftLabel = (label: string) =>
+    setDraft((d) => ({ ...d, label }));
   const updateDraftSub = (sub: string) => setDraft((d) => ({ ...d, sub }));
 
   const commitEdit = () => {
     if (!editingId) return;
     const id = editingId;
     withActivePage((notes, links) => ({
-      notes: notes.map((n) => (n.id === id ? { ...n, label: draft.label, sub: draft.sub } : n)),
+      notes: notes.map((n) =>
+        n.id === id ? { ...n, label: draft.label, sub: draft.sub } : n,
+      ),
       links,
     }));
     setEditingId(null);
@@ -145,7 +191,10 @@ export default function StudioCanvas() {
   };
 
   const handleDeleteLink = (id: string) => {
-    withActivePage((notes, links) => ({ notes, links: links.filter((l) => l.id !== id) }));
+    withActivePage((notes, links) => ({
+      notes,
+      links: links.filter((l) => l.id !== id),
+    }));
     setHoverDelete(null);
   };
 
@@ -154,7 +203,14 @@ export default function StudioCanvas() {
     withActivePage((notes, links) => ({
       notes: [
         ...notes,
-        { id, label: "New note", sub: "", kind: "fx", x: 38 + Math.random() * 24, y: 30 + Math.random() * 40 },
+        {
+          id,
+          label: "New note",
+          sub: "",
+          kind: "fx",
+          x: canvasW * 0.38 + Math.random() * canvasW * 0.24,
+          y: canvasH * 0.3 + Math.random() * canvasH * 0.4,
+        },
       ],
       links,
     }));
@@ -164,7 +220,10 @@ export default function StudioCanvas() {
   const handleAddPage = () => {
     const id = crypto.randomUUID();
     setPages((prev) => {
-      const next = [...prev, { id, name: `Page ${prev.length + 1}`, notes: [], links: [] }];
+      const next = [
+        ...prev,
+        { id, name: `Page ${prev.length + 1}`, notes: [], links: [] },
+      ];
       pagesRef.current = next;
       return next;
     });
@@ -172,21 +231,39 @@ export default function StudioCanvas() {
     setActivePageId(id);
   };
 
-  const handleReset = () => {
-    const fresh = [makeFirstPage()];
-    pagesRef.current = fresh;
-    activePageIdRef.current = "page-1";
-    setPages(fresh);
-    setActivePageId("page-1");
+  const handleResetPage = () => {
+    const page = activePage;
+    const seed = page.origin
+      ? studio.pages.find((sp) => sp.id === page.origin)
+      : undefined;
+    const next = pagesRef.current.map((p) =>
+      p.id !== page.id
+        ? p
+        : seed
+          ? {
+              ...p,
+              width: seed.width,
+              height: seed.height,
+              notes: seed.nodes.map((n) => ({ ...n })),
+              links: seed.links.map((l, i) => ({ id: `${seed.id}-seed-${i}`, ...l })),
+            }
+          : { ...p, notes: [], links: [] },
+    );
+    pagesRef.current = next;
+    setPages(next);
     setEditingId(null);
     setHoverDelete(null);
   };
 
   const handleDownload = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const stage = stageRef.current;
+    if (!stage) return;
     try {
-      const dataUrl = await toPng(canvas, { backgroundColor: "#101010", pixelRatio: 2 });
+      const dataUrl = await toPng(stage, {
+        backgroundColor: "#101010",
+        pixelRatio: 2,
+        filter: (node) => node !== hintRef.current,
+      });
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = `studio-${activePage.name.toLowerCase().replace(/\s+/g, "-")}.png`;
@@ -196,21 +273,36 @@ export default function StudioCanvas() {
     }
   };
 
-  const clearHoverDelete = () => setHoverDelete(null);
+  const clearHoverDelete = () => {
+    keepHoverDelete();
+    hoverDeleteTimer.current = globalThis.setTimeout(
+      () => setHoverDelete(null),
+      150,
+    );
+  };
 
   return (
-    <section id="studio" ref={root} className="relative bg-ink px-6 py-28 md:px-12">
+    <section
+      id="studio"
+      ref={root}
+      className="relative bg-ink px-6 py-28 md:px-12"
+    >
       <div className="mx-auto mb-12 flex max-w-6xl flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="flex items-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
             <span className="h-px w-8 bg-flame/60" />
             {studio.kicker}
           </p>
-          <h2 data-skew className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl">
+          <h2
+            data-skew
+            className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl"
+          >
             {studio.title}
           </h2>
         </div>
-        <p className="max-w-xs text-sm font-light text-paper/50 md:text-right">{studio.hint}</p>
+        <p className="max-w-xs text-sm font-light text-paper/50 md:text-right">
+          {studio.hint}
+        </p>
       </div>
 
       {!reduced && (
@@ -242,7 +334,7 @@ export default function StudioCanvas() {
 
       <div
         ref={stageRef}
-        className="relative mx-auto h-[80vh] w-full max-w-7xl overflow-hidden rounded-3xl border-2 border-paper/15 bg-[#101010]"
+        className="studio-stage relative mx-auto h-[80vh] w-full max-w-7xl overflow-hidden rounded-3xl border-2 border-paper/15 bg-[#101010]"
       >
         {reduced ? (
           <>
@@ -255,8 +347,10 @@ export default function StudioCanvas() {
               }}
             />
             {renderBoard({
-              notes: studio.nodes,
-              links: studio.links.map((l, i) => ({ id: `seed-${i}`, ...l })),
+              notes: studio.pages[0].nodes,
+              links: studio.pages[0].links.map((l, i) => ({ id: `seed-${i}`, ...l })),
+              width: canvasSize(studio.pages[0]).w,
+              height: canvasSize(studio.pages[0]).h,
               interactive: false,
               editingId: null,
               draft,
@@ -266,6 +360,7 @@ export default function StudioCanvas() {
               pendingRef,
               onWireEnter,
               clearHoverDelete,
+              keepHoverDelete,
               handleDeleteLink,
               openEdit,
               handleDeleteNote,
@@ -279,44 +374,61 @@ export default function StudioCanvas() {
           </>
         ) : (
           <>
-            <div
-              ref={canvasRef}
-              className="absolute top-0 left-0 will-change-transform"
-              style={{ width: CANVAS_W, height: CANVAS_H }}
+            <button
+              type="button"
+              onClick={handleResetPage}
+              aria-label={studio.resetLabel}
+              className="absolute top-5 right-5 z-30 cursor-pointer rounded-full border border-paper/20 bg-ink/60 px-4 py-1.5 text-xs font-medium tracking-[0.15em] text-paper/70 uppercase backdrop-blur-sm hover:border-flame hover:text-flame"
             >
-              <div
-                ref={bgRef}
-                className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
-                  backgroundSize: "44px 44px",
-                }}
-              >
-                <span className="font-display pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[18rem] leading-none text-paper/3 uppercase">
-                  {studio.watermark}
-                </span>
-              </div>
+              {studio.resetLabel}
+            </button>
 
-              {renderBoard({
-                notes: activePage.notes,
-                links: activePage.links,
-                interactive: true,
-                editingId,
-                draft,
-                hoverDelete,
-                wireRefs,
-                hitRefs,
-                pendingRef,
-                onWireEnter,
-                clearHoverDelete,
-                handleDeleteLink,
-                openEdit,
-                handleDeleteNote,
-                updateDraftLabel,
-                updateDraftSub,
-                commitEdit,
-              })}
+            <div ref={zoomLayerRef} className="absolute inset-0 origin-top-left">
+              <div
+                ref={canvasRef}
+                className="absolute top-0 left-0 will-change-transform"
+                style={{ width: canvasW, height: canvasH }}
+              >
+                <div
+                  ref={bgRef}
+                  className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+                    backgroundSize: "44px 44px",
+                  }}
+                >
+                  <span
+                    ref={watermarkRef}
+                    className="font-display pointer-events-none absolute top-[40%] left-[48%] text-[30rem] leading-none text-paper/3 uppercase will-change-transform"
+                  >
+                    {studio.watermark}
+                  </span>
+                </div>
+
+                {renderBoard({
+                  notes: activePage.notes,
+                  links: activePage.links,
+                  width: canvasW,
+                  height: canvasH,
+                  interactive: true,
+                  editingId,
+                  draft,
+                  hoverDelete,
+                  wireRefs,
+                  hitRefs,
+                  pendingRef,
+                  onWireEnter,
+                  clearHoverDelete,
+                  keepHoverDelete,
+                  handleDeleteLink,
+                  openEdit,
+                  handleDeleteNote,
+                  updateDraftLabel,
+                  updateDraftSub,
+                  commitEdit,
+                })}
+              </div>
             </div>
 
             <div
@@ -325,6 +437,27 @@ export default function StudioCanvas() {
             >
               <span className="text-flame">⟿</span>
               {studio.dragHint} · drag the wall to roam
+            </div>
+
+            <div className="absolute right-5 bottom-5 z-30 flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoom >= ZOOM_MAX}
+                aria-label="Zoom in"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoom <= ZOOM_MIN}
+                aria-label="Zoom out"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                −
+              </button>
             </div>
           </>
         )}
@@ -347,14 +480,6 @@ export default function StudioCanvas() {
             className="cursor-pointer rounded-full border-2 border-paper/30 px-6 py-2.5 text-sm font-bold tracking-[0.15em] text-paper/70 uppercase transition-colors duration-200 hover:border-paper hover:text-paper"
           >
             {studio.downloadLabel}
-          </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            data-magnetic
-            className="cursor-pointer rounded-full border-2 border-paper/30 px-6 py-2.5 text-sm font-bold tracking-[0.15em] text-paper/70 uppercase transition-colors duration-200 hover:border-paper hover:text-paper"
-          >
-            {studio.resetLabel}
           </button>
         </div>
       )}
