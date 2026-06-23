@@ -19,6 +19,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --cursor-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='3' fill='%23f2f0ea' stroke='%230a0a0a' stroke-width='1'/%3E%3C/svg%3E")
+    5 5, auto;
 }
 
 html,
@@ -115,4 +118,13 @@ nav button {
   .badge-spin {
     animation: none !important;
   }
+}
+
+html.custom-cursor-active,
+html.custom-cursor-active body {
+  cursor: var(--cursor-dot);
+}
+
+html.custom-cursor-active *:not(.studio-stage, .studio-stage *) {
+  cursor: var(--cursor-dot) !important;
 }

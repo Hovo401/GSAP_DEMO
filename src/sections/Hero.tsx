@@ -8,7 +8,15 @@ import { DURATION, EASE, STAGGER } from "../lib/motion";
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const titleWrapRef = useRef<HTMLDivElement>(null);
+  const kickerWrapRef = useRef<HTMLDivElement>(null);
+  const subtitleWrapRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
+  const glowARef = useRef<HTMLDivElement>(null);
+  const glowBRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
   const titleRef = useSplitReveal<HTMLHeadingElement>("lines,words", "words", {
@@ -51,6 +59,14 @@ export default function Hero() {
         stagger: 1.4,
       });
 
+      gsap.to(spotlightRef.current, {
+        filter: "hue-rotate(25deg)",
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
       gsap.to(contentRef.current, {
         yPercent: -18,
         scale: 0.92,
@@ -65,6 +81,9 @@ export default function Hero() {
         },
       });
 
+      gsap.set(spotlightRef.current, { xPercent: -50, yPercent: -50 });
+      gsap.set(hintRef.current, { xPercent: -50 });
+
       gsap.to(hintRef.current, {
         y: 10,
         repeat: -1,
@@ -72,6 +91,90 @@ export default function Hero() {
         duration: 1,
         ease: "sine.inOut",
       });
+
+      if (!window.matchMedia("(pointer: fine)").matches) return;
+
+      const quickToOpts = { duration: DURATION.medium, ease: "power3" };
+      const gridX = gsap.quickTo(gridRef.current, "x", quickToOpts);
+      const gridY = gsap.quickTo(gridRef.current, "y", quickToOpts);
+      const glowAX = gsap.quickTo(glowARef.current, "x", quickToOpts);
+      const glowAY = gsap.quickTo(glowARef.current, "y", quickToOpts);
+      const glowBX = gsap.quickTo(glowBRef.current, "x", quickToOpts);
+      const glowBY = gsap.quickTo(glowBRef.current, "y", quickToOpts);
+      const tiltX = gsap.quickTo(tiltRef.current, "rotateX", quickToOpts);
+      const tiltY = gsap.quickTo(tiltRef.current, "rotateY", quickToOpts);
+      const titleX = gsap.quickTo(titleWrapRef.current, "x", quickToOpts);
+      const titleY = gsap.quickTo(titleWrapRef.current, "y", quickToOpts);
+      const kickerX = gsap.quickTo(kickerWrapRef.current, "x", quickToOpts);
+      const kickerY = gsap.quickTo(kickerWrapRef.current, "y", quickToOpts);
+      const subtitleX = gsap.quickTo(subtitleWrapRef.current, "x", quickToOpts);
+      const subtitleY = gsap.quickTo(subtitleWrapRef.current, "y", quickToOpts);
+      const hintX = gsap.quickTo(hintRef.current, "x", quickToOpts);
+      const spotlightX = gsap.quickTo(spotlightRef.current, "x", {
+        duration: 0.5,
+        ease: "power3",
+      });
+      const spotlightY = gsap.quickTo(spotlightRef.current, "y", {
+        duration: 0.5,
+        ease: "power3",
+      });
+      const metaSetters = Array.from(
+        root.current!.querySelectorAll<HTMLElement>(".hero-meta"),
+      ).map((el, i) => {
+        const sign = i % 2 === 0 ? 1 : -1;
+        return {
+          x: gsap.quickTo(el, "x", quickToOpts),
+          y: gsap.quickTo(el, "y", quickToOpts),
+          sign,
+        };
+      });
+
+      let lastX = 0;
+      let lastY = 0;
+
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = root.current!.getBoundingClientRect();
+        const nx = gsap.utils.clamp(
+          -1,
+          1,
+          (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2),
+        );
+        const ny = gsap.utils.clamp(
+          -1,
+          1,
+          (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2),
+        );
+
+        const speed = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+        lastX = e.clientX;
+        lastY = e.clientY;
+        const boost = gsap.utils.clamp(1, 1.7, 1 + speed / 35);
+
+        gridX(nx * -320);
+        gridY(ny * -320);
+        glowAX(nx * -600 * boost);
+        glowAY(ny * -460 * boost);
+        glowBX(nx * -520 * boost);
+        glowBY(ny * -640 * boost);
+        tiltY(nx * 8);
+        tiltX(ny * -8);
+        titleX(nx * 26);
+        titleY(ny * 18);
+        kickerX(nx * 16);
+        kickerY(ny * 10);
+        subtitleX(nx * 14);
+        subtitleY(ny * 10);
+        hintX(nx * 10);
+        spotlightX(e.clientX - (rect.left + rect.width / 2));
+        spotlightY(e.clientY - (rect.top + rect.height / 2));
+        metaSetters.forEach(({ x, y, sign }) => {
+          x(nx * 12 * sign);
+          y(ny * 12 * sign);
+        });
+      };
+
+      window.addEventListener("pointermove", onPointerMove);
+      return () => window.removeEventListener("pointermove", onPointerMove);
     },
     { scope: root, dependencies: [reduced] },
   );
@@ -80,9 +183,7 @@ export default function Hero() {
     hero.titleLines.map((line) => (
       <span key={line} className="block overflow-hidden">
         <span
-          className={
-            line === hero.accentWord ? "text-flame" : "text-paper"
-          }
+          className={line === hero.accentWord ? "text-flame" : "text-paper"}
         >
           {line}
         </span>
@@ -96,20 +197,38 @@ export default function Hero() {
       className="relative flex h-screen items-center justify-center overflow-hidden bg-ink px-6"
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="hero-glow glow absolute top-1/4 left-1/4 h-[40vw] w-[40vw] opacity-50" />
-        <div className="hero-glow glow absolute right-1/4 bottom-1/4 h-[32vw] w-[32vw] opacity-40" />
+        <div
+          ref={glowARef}
+          className="hero-glow glow absolute top-1/4 left-1/4 h-[40vw] w-[40vw] opacity-50"
+        />
+        <div
+          ref={glowBRef}
+          className="hero-glow glow absolute right-1/4 bottom-1/4 h-[32vw] w-[32vw] opacity-40"
+        />
       </div>
 
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        ref={gridRef}
+        className="pointer-events-none absolute inset-0 opacity-[0.12]"
         style={{
           backgroundImage:
             "linear-gradient(var(--color-paper) 1px, transparent 1px), linear-gradient(90deg, var(--color-paper) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
+          backgroundSize: "60px 60px",
           maskImage:
-            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+            "radial-gradient(ellipse at center, black 40%, transparent 80%)",
           WebkitMaskImage:
-            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+            "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+        }}
+      />
+
+      <div
+        ref={spotlightRef}
+        className="pointer-events-none absolute top-1/2 left-1/2 h-[40vw] w-[40vw] rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--color-flame) 35%, transparent) 0%, transparent 60%)",
+          mixBlendMode: "screen",
+          filter: "hue-rotate(0deg)",
         }}
       />
 
@@ -123,26 +242,38 @@ export default function Hero() {
         40°N — 44°E
       </span>
 
-      <div ref={contentRef} className="relative text-center">
-        <p className="hero-fade mb-6 flex items-center justify-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
-          <span className="h-px w-8 bg-flame/60" />
-          {brand.name} — {hero.kicker}
-          <span className="h-px w-8 bg-flame/60" />
-        </p>
-        <h1
-          ref={titleRef}
-          className="font-display text-[20vw] leading-[0.85] tracking-tight uppercase md:text-[16vw]"
-        >
-          {renderTitle()}
-        </h1>
-        <p className="hero-fade mx-auto mt-8 max-w-xl text-lg font-light text-paper/60 md:text-2xl">
-          {hero.subtitle}
-        </p>
+      <div
+        ref={contentRef}
+        className="relative text-center"
+        style={{ perspective: "1200px" }}
+      >
+        <div ref={tiltRef} className="will-change-transform">
+          <div ref={kickerWrapRef} className="will-change-transform">
+            <p className="hero-fade mb-6 flex items-center justify-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
+              <span className="h-px w-8 bg-flame/60" />
+              {brand.name} — {hero.kicker}
+              <span className="h-px w-8 bg-flame/60" />
+            </p>
+          </div>
+          <div ref={titleWrapRef} className="will-change-transform">
+            <h1
+              ref={titleRef}
+              className="font-display text-[20vw] leading-[0.85] tracking-tight uppercase md:text-[16vw]"
+            >
+              {renderTitle()}
+            </h1>
+          </div>
+          <div ref={subtitleWrapRef} className="will-change-transform">
+            <p className="hero-fade mx-auto mt-8 max-w-xl text-lg font-light text-paper/60 md:text-2xl">
+              {hero.subtitle}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div
         ref={hintRef}
-        className="absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-xs font-medium tracking-[0.3em] text-paper/40 uppercase"
+        className="absolute bottom-10 left-1/2 flex flex-col items-center gap-2 text-xs font-medium tracking-[0.3em] text-paper/40 uppercase"
       >
         {hero.scrollHint}
         <span className="text-flame">↓</span>

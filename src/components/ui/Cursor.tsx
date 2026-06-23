@@ -20,6 +20,11 @@ export default function Cursor() {
     return () => mq.removeEventListener("change", onChange);
   }, [reduced]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("custom-cursor-active", enabled);
+    return () => document.documentElement.classList.remove("custom-cursor-active");
+  }, [enabled]);
+
   useGSAP(
     () => {
       const wrap = wrapRef.current;
@@ -135,7 +140,7 @@ export default function Cursor() {
     >
       <div
         ref={dotRef}
-        className="absolute h-8 w-8 rounded-full bg-paper mix-blend-difference"
+        className="absolute h-8 w-8 rounded-full backdrop-invert"
       />
       <div ref={badgeRef} className="absolute">
         {onCard && <VisitBadge />}
