@@ -1,7 +1,6 @@
 import { studio } from "../../content/site";
 import type { Pt, Note, Link, Page } from "./types";
 
-// The pannable wall is larger than the viewport so there's room to roam.
 export const CANVAS_W = 1700;
 export const CANVAS_H = 1150;
 
@@ -9,10 +8,17 @@ export const ZOOM_MIN = 0.6;
 export const ZOOM_MAX = 1.6;
 export const ZOOM_STEP = 0.2;
 
+export function canvasSize(page: { width?: number; height?: number }) {
+  return { w: page.width ?? CANVAS_W, h: page.height ?? CANVAS_H };
+}
+
 export function makeSeedPages(): Page[] {
   return studio.pages.map((page) => ({
     id: page.id,
     name: page.name,
+    width: page.width,
+    height: page.height,
+    origin: page.id,
     notes: page.nodes.map((n) => ({ ...n })),
     links: page.links.map((l, i) => ({ id: `${page.id}-seed-${i}`, ...l })),
   }));
@@ -77,7 +83,7 @@ export function addLinkIfMissing(
 }
 
 // Fold each node's live drag offset (in canvas pixels) back into its stored
-// percentage position on the given page.
+// pixel position on the given page.
 export function foldPositions(pages: Page[], pageId: string, positions: Record<string, Pt>): Page[] {
   return pages.map((p) => {
     if (p.id !== pageId) return p;
@@ -86,7 +92,7 @@ export function foldPositions(pages: Page[], pageId: string, positions: Record<s
       notes: p.notes.map((n) => {
         const pos = positions[n.id];
         if (!pos) return n;
-        return { ...n, x: n.x + (pos.x / CANVAS_W) * 100, y: n.y + (pos.y / CANVAS_H) * 100 };
+        return { ...n, x: n.x + pos.x, y: n.y + pos.y };
       }),
     };
   });

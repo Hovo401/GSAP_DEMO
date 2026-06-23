@@ -13,4 +13,13 @@ export type Note = {
 
 export type Link = { id: string; from: string; to: string };
 
-export type Page = { id: string; name: string; notes: Note[]; links: Link[] };
+export type Page = {
+  id: string;
+  name: string;
+  width?: number;
+  height?: number;
+  /** id of the `studio.pages` seed this page resets to, if any. */
+  origin?: string;
+  notes: Note[];
+  links: Link[];
+};

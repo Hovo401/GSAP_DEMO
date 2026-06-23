@@ -4,11 +4,10 @@ import type { Draggable } from "../lib/gsap";
 import { studio } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import {
-  CANVAS_W,
-  CANVAS_H,
   ZOOM_MIN,
   ZOOM_MAX,
   ZOOM_STEP,
+  canvasSize,
   makeSeedPages,
   drawWires,
 } from "./studio/geometry";
@@ -67,6 +66,7 @@ export default function StudioCanvas() {
 
   const activePage = pages.find((p) => p.id === activePageId) ?? pages[0];
   const noteIds = activePage.notes.map((n) => n.id).join(",");
+  const { w: canvasW, h: canvasH } = canvasSize(activePage);
 
   function withActivePage(
     mutator: (
@@ -87,7 +87,15 @@ export default function StudioCanvas() {
       nextActiveId = crypto.randomUUID();
       next = [
         ...prev,
-        { id: nextActiveId, name: `Page ${prev.length + 1}`, notes, links },
+        {
+          id: nextActiveId,
+          name: `Page ${prev.length + 1}`,
+          width: page.width,
+          height: page.height,
+          origin: page.origin ?? page.id,
+          notes,
+          links,
+        },
       ];
     } else {
       next = prev.map((p, i) => (i === idx ? { ...p, notes, links } : p));
@@ -200,8 +208,8 @@ export default function StudioCanvas() {
           label: "New note",
           sub: "",
           kind: "fx",
-          x: 38 + Math.random() * 24,
-          y: 30 + Math.random() * 40,
+          x: canvasW * 0.38 + Math.random() * canvasW * 0.24,
+          y: canvasH * 0.3 + Math.random() * canvasH * 0.4,
         },
       ],
       links,
@@ -221,6 +229,30 @@ export default function StudioCanvas() {
     });
     activePageIdRef.current = id;
     setActivePageId(id);
+  };
+
+  const handleResetPage = () => {
+    const page = activePage;
+    const seed = page.origin
+      ? studio.pages.find((sp) => sp.id === page.origin)
+      : undefined;
+    const next = pagesRef.current.map((p) =>
+      p.id !== page.id
+        ? p
+        : seed
+          ? {
+              ...p,
+              width: seed.width,
+              height: seed.height,
+              notes: seed.nodes.map((n) => ({ ...n })),
+              links: seed.links.map((l, i) => ({ id: `${seed.id}-seed-${i}`, ...l })),
+            }
+          : { ...p, notes: [], links: [] },
+    );
+    pagesRef.current = next;
+    setPages(next);
+    setEditingId(null);
+    setHoverDelete(null);
   };
 
   const handleDownload = async () => {
@@ -317,6 +349,8 @@ export default function StudioCanvas() {
             {renderBoard({
               notes: studio.pages[0].nodes,
               links: studio.pages[0].links.map((l, i) => ({ id: `seed-${i}`, ...l })),
+              width: canvasSize(studio.pages[0]).w,
+              height: canvasSize(studio.pages[0]).h,
               interactive: false,
               editingId: null,
               draft,
@@ -340,11 +374,20 @@ export default function StudioCanvas() {
           </>
         ) : (
           <>
+            <button
+              type="button"
+              onClick={handleResetPage}
+              aria-label={studio.resetLabel}
+              className="absolute top-5 right-5 z-30 cursor-pointer rounded-full border border-paper/20 bg-ink/60 px-4 py-1.5 text-xs font-medium tracking-[0.15em] text-paper/70 uppercase backdrop-blur-sm hover:border-flame hover:text-flame"
+            >
+              {studio.resetLabel}
+            </button>
+
             <div ref={zoomLayerRef} className="absolute inset-0 origin-top-left">
               <div
                 ref={canvasRef}
                 className="absolute top-0 left-0 will-change-transform"
-                style={{ width: CANVAS_W, height: CANVAS_H }}
+                style={{ width: canvasW, height: canvasH }}
               >
                 <div
                   ref={bgRef}
@@ -366,6 +409,8 @@ export default function StudioCanvas() {
                 {renderBoard({
                   notes: activePage.notes,
                   links: activePage.links,
+                  width: canvasW,
+                  height: canvasH,
                   interactive: true,
                   editingId,
                   draft,

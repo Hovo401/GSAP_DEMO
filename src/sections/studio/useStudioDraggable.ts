@@ -3,8 +3,7 @@ import { flushSync } from "react-dom";
 import { gsap, Draggable, useGSAP } from "../../lib/gsap";
 import { DURATION, EASE } from "../../lib/motion";
 import {
-  CANVAS_W,
-  CANVAS_H,
+  canvasSize,
   centerOf,
   wirePath,
   drawWires,
@@ -77,10 +76,10 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
       const bg = bgRef.current;
       const watermark = watermarkRef.current;
       const pending = pendingRef.current;
-      if (reduced || !stage || !canvas || !zoomLayer || !bg || !pending)
-        return;
+      if (reduced || !stage || !canvas || !zoomLayer || !bg || !pending) return;
 
       const pageIdAtMount = activePageId;
+      const { w: canvasW, h: canvasH } = canvasSize(activePage);
       const nodeEls = gsap.utils.toArray<HTMLElement>(
         canvas.querySelectorAll(".studio-node"),
       );
@@ -95,9 +94,8 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
           gsap.to(hintRef.current, { autoAlpha: 0, duration: 0.3 });
       };
       const currentLinks = () =>
-        (
-          pagesRef.current.find((p) => p.id === pageIdAtMount) ?? activePage
-        ).links;
+        (pagesRef.current.find((p) => p.id === pageIdAtMount) ?? activePage)
+          .links;
       const redraw = () =>
         drawWires(
           canvas,
@@ -128,8 +126,8 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
 
       gsap.set(zoomLayer, { scale: zoomRef.current });
 
-      const originX = (stage.clientWidth / zoomRef.current - CANVAS_W) / 2;
-      const originY = (stage.clientHeight / zoomRef.current - CANVAS_H) / 2;
+      let originX = (stage.clientWidth / zoomRef.current - canvasW) / 2;
+      let originY = (stage.clientHeight / zoomRef.current - canvasH) / 2;
       gsap.set(canvas, { x: originX, y: originY });
 
       if (watermark) gsap.set(watermark, { xPercent: -50, yPercent: -50 });
@@ -146,8 +144,8 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
       };
 
       const panBounds = (): PanBounds => ({
-        minX: stage.clientWidth / zoomRef.current - CANVAS_W,
-        minY: stage.clientHeight / zoomRef.current - CANVAS_H,
+        minX: stage.clientWidth / zoomRef.current - canvasW,
+        minY: stage.clientHeight / zoomRef.current - canvasH,
         maxX: 0,
         maxY: 0,
       });
@@ -156,7 +154,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         type: "x,y",
         trigger: bg,
         bounds: panBounds(),
-        inertia: true,
+        inertia: { resistance: 3000 },
         edgeResistance: 0.9,
         onPress: fadeHint,
         onDrag: updateParallax,
@@ -171,7 +169,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         const [inst] = Draggable.create(node, {
           type: "x,y",
           bounds: canvas,
-          inertia: true,
+          inertia: { resistance: 3000 },
           edgeResistance: 0.9,
           onPress: () => {
             fadeHint();
@@ -275,8 +273,21 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
 
       redraw();
       const onResize = () => {
-        pan.applyBounds(panBounds());
+        const bounds = panBounds();
+        pan.applyBounds(bounds);
         drags.forEach((d) => d.applyBounds(canvas));
+
+        const x = gsap.getProperty(canvas, "x") as number;
+        const y = gsap.getProperty(canvas, "y") as number;
+        const clampedX = Math.min(bounds.maxX, Math.max(bounds.minX, x));
+        const clampedY = Math.min(bounds.maxY, Math.max(bounds.minY, y));
+        if (clampedX !== x || clampedY !== y) {
+          gsap.set(canvas, { x: clampedX, y: clampedY });
+        }
+
+        originX = (stage.clientWidth / zoomRef.current - canvasW) / 2;
+        originY = (stage.clientHeight / zoomRef.current - canvasH) / 2;
+        updateParallax();
       };
       globalThis.addEventListener("resize", onResize);
 
@@ -315,7 +326,11 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
     if (reduced) return;
     const layer = zoomLayerRef.current;
     if (!layer) return;
-    gsap.to(layer, { scale: zoom, duration: DURATION.fast, ease: EASE.softOut });
+    gsap.to(layer, {
+      scale: zoom,
+      duration: DURATION.fast,
+      ease: EASE.softOut,
+    });
     if (panBoundsFnRef.current) {
       panInstRef.current?.applyBounds(panBoundsFnRef.current());
     }
