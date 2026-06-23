@@ -150,14 +150,35 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         maxY: 0,
       });
 
+      let lastTouchY: number | null = null;
+
       const [pan] = Draggable.create(canvas, {
         type: "x,y",
         trigger: bg,
         bounds: panBounds(),
-        inertia: { resistance: 3000 },
+        inertia: true,
+        resistance: 3650,
         edgeResistance: 0.9,
-        onPress: fadeHint,
-        onDrag: updateParallax,
+        onPress: function (this: Draggable) {
+          fadeHint();
+          const pe = this.pointerEvent as PointerEvent | undefined;
+          lastTouchY = pe?.pointerType === "touch" ? this.pointerY : null;
+        },
+        onDrag: function (this: Draggable) {
+          updateParallax();
+          if (lastTouchY === null) return;
+          const currentY = this.pointerY;
+          const deltaY = currentY - lastTouchY;
+          lastTouchY = currentY;
+          if (!deltaY) return;
+          const bounds = panBounds();
+          const EPS = 1;
+          const atTop = this.y >= bounds.maxY - EPS;
+          const atBottom = this.y <= bounds.minY + EPS;
+          if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+            globalThis.scrollBy(0, -deltaY);
+          }
+        },
         onThrowUpdate: updateParallax,
       });
 
@@ -169,7 +190,8 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         const [inst] = Draggable.create(node, {
           type: "x,y",
           bounds: canvas,
-          inertia: { resistance: 3000 },
+          inertia: true,
+          resistance: 3650,
           edgeResistance: 0.9,
           onPress: () => {
             fadeHint();
