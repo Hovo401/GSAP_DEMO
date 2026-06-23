@@ -227,6 +227,7 @@ function renderNote(
         {hasOutput(node.kind) && (
           <span
             data-port={`${node.id}:out`}
+            data-clickable="true"
             className={`absolute top-1/2 right-0 h-4 w-4 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-flame bg-flame/80 ${
               interactive ? "cursor-crosshair" : ""
             }`}

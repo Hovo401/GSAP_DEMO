@@ -156,6 +156,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         type: "x,y",
         trigger: bg,
         bounds: panBounds(),
+        dragClickables: false,
         inertia: true,
         resistance: 3650,
         edgeResistance: 0.9,
@@ -190,6 +191,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         const [inst] = Draggable.create(node, {
           type: "x,y",
           bounds: canvas,
+          dragClickables: false,
           inertia: true,
           resistance: 3650,
           edgeResistance: 0.9,

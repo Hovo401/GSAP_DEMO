@@ -68,6 +68,22 @@ export default function StudioCanvas() {
   const noteIds = activePage.notes.map((n) => n.id).join(",");
   const { w: canvasW, h: canvasH } = canvasSize(activePage);
 
+  const [minZoom, setMinZoom] = useState(ZOOM_MIN);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const updateMinZoom = () => {
+      const fit = Math.min(stage.clientWidth / canvasW, stage.clientHeight / canvasH);
+      setMinZoom(Math.min(ZOOM_MIN, fit));
+    };
+    updateMinZoom();
+    globalThis.addEventListener("resize", updateMinZoom);
+    return () => globalThis.removeEventListener("resize", updateMinZoom);
+  }, [canvasW, canvasH]);
+  useEffect(() => {
+    setZoom((z) => Math.max(minZoom, Math.min(ZOOM_MAX, z)));
+  }, [minZoom]);
+
   function withActivePage(
     mutator: (
       notes: Note[],
@@ -134,7 +150,7 @@ export default function StudioCanvas() {
   const handleZoomIn = () =>
     setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100));
   const handleZoomOut = () =>
-    setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100));
+    setZoom((z) => Math.max(minZoom, Math.round((z - ZOOM_STEP) * 100) / 100));
 
   useEffect(() => {
     Object.entries(dragInstRef.current).forEach(([id, inst]) => {
@@ -451,7 +467,7 @@ export default function StudioCanvas() {
               <button
                 type="button"
                 onClick={handleZoomOut}
-                disabled={zoom <= ZOOM_MIN}
+                disabled={zoom <= minZoom}
                 aria-label="Zoom out"
                 className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
               >
