@@ -31,7 +31,7 @@ export default function ContactPanel({ open, onClose }: Props) {
       tl.set(backdropRef.current, { autoAlpha: 1 }, 0)
         .to(
           backdropRef.current,
-          { backgroundColor: "rgba(0,0,0,0.55)", duration: 0.4 },
+          { backgroundColor: "rgba(0,0,0,0.85)", duration: 0.4 },
           0,
         )
         .to(
@@ -51,7 +51,13 @@ export default function ContactPanel({ open, onClose }: Props) {
         )
         .from(
           ".contact-stagger",
-          { y: 22, opacity: 0, duration: 0.5, ease: "power2.out", stagger: 0.07 },
+          {
+            y: 22,
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.out",
+            stagger: 0.07,
+          },
           0.55,
         );
 
@@ -114,7 +120,7 @@ export default function ContactPanel({ open, onClose }: Props) {
       <div
         ref={backdropRef}
         onClick={onClose}
-        className="absolute inset-0 cursor-pointer backdrop-blur-md"
+        className="absolute inset-0 cursor-pointer"
       />
 
       <div className="absolute inset-y-0 right-0 w-full max-w-170">
