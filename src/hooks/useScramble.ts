@@ -1,7 +1,10 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "../lib/gsap";
+import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { useReducedMotion } from "./useReducedMotion";
 import { SCROLL_START } from "../lib/motion";
+
+gsap.registerPlugin(ScrambleTextPlugin);
 
 export function useScramble<T extends HTMLElement = HTMLHeadingElement>(
   text: string,

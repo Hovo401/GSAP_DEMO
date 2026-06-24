@@ -29,6 +29,10 @@ export default function Marquee() {
           const dir = v < 0 ? -1 : 1;
           loop.timeScale(dir * gsap.utils.clamp(0.3, 4, 1 + Math.abs(v) / 600));
         },
+        onEnter: () => loop.play(),
+        onLeave: () => loop.pause(),
+        onEnterBack: () => loop.play(),
+        onLeaveBack: () => loop.pause(),
       });
 
       return () => st.kill();

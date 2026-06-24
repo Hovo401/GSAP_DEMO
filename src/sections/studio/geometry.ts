@@ -26,12 +26,13 @@ export function makeSeedPages(): Page[] {
 
 // `zoom` is the CSS scale applied to an ancestor of `board`, so the raw
 // screen-pixel delta must be divided back down to board-local units.
-export function centerOf(el: Element, board: HTMLElement, zoom = 1): Pt {
+// `boardRect` is passed in (rather than measured here) so callers that need
+// several centers in the same gesture/redraw can measure the board once.
+export function centerOf(el: Element, boardRect: DOMRect, zoom = 1): Pt {
   const r = el.getBoundingClientRect();
-  const b = board.getBoundingClientRect();
   return {
-    x: (r.left + r.width / 2 - b.left) / zoom,
-    y: (r.top + r.height / 2 - b.top) / zoom,
+    x: (r.left + r.width / 2 - boardRect.left) / zoom,
+    y: (r.top + r.height / 2 - boardRect.top) / zoom,
   };
 }
 
@@ -56,11 +57,15 @@ export function drawWires(
   links: Link[],
   zoom = 1,
 ) {
+  const boardRect = board.getBoundingClientRect();
   links.forEach((link) => {
     const out = board.querySelector(`[data-port="${link.from}:out"]`);
     const inp = board.querySelector(`[data-port="${link.to}:in"]`);
     if (!out || !inp) return;
-    const d = wirePath(centerOf(out, board, zoom), centerOf(inp, board, zoom));
+    const d = wirePath(
+      centerOf(out, boardRect, zoom),
+      centerOf(inp, boardRect, zoom),
+    );
     wires[link.id]?.setAttribute("d", d);
     hits[link.id]?.setAttribute("d", d);
   });

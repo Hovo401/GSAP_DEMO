@@ -1,6 +1,10 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { flushSync } from "react-dom";
-import { gsap, Draggable, useGSAP } from "../../lib/gsap";
+import { gsap, useGSAP } from "../../lib/gsap";
+import { Draggable } from "gsap/Draggable";
+import { InertiaPlugin } from "gsap/InertiaPlugin";
+
+gsap.registerPlugin(Draggable, InertiaPlugin);
 import { DURATION, EASE } from "../../lib/motion";
 import {
   canvasSize,
@@ -208,8 +212,9 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
       });
 
       let fromId: string | null = null;
+      let wiringBoardRect: DOMRect | null = null;
       const boardPoint = (e: PointerEvent): Pt => {
-        const b = canvas.getBoundingClientRect();
+        const b = wiringBoardRect ?? canvas.getBoundingClientRect();
         const z = zoomRef.current;
         return { x: (e.clientX - b.left) / z, y: (e.clientY - b.top) / z };
       };
@@ -220,7 +225,10 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         if (out)
           pending.setAttribute(
             "d",
-            wirePath(centerOf(out, canvas, zoomRef.current), boardPoint(e)),
+            wirePath(
+              centerOf(out, wiringBoardRect!, zoomRef.current),
+              boardPoint(e),
+            ),
           );
       };
 
@@ -235,10 +243,12 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         let best: HTMLElement | null = null;
         let bestDist = 52;
         const drop = boardPoint(e);
+        const boardRect = wiringBoardRect!;
+        wiringBoardRect = null;
         canvas
           .querySelectorAll<HTMLElement>("[data-port$=':in']")
           .forEach((el) => {
-            const c = centerOf(el, canvas, zoomRef.current);
+            const c = centerOf(el, boardRect, zoomRef.current);
             const dist = Math.hypot(c.x - drop.x, c.y - drop.y);
             if (dist < bestDist) {
               bestDist = dist;
@@ -283,6 +293,7 @@ export function useStudioDraggable(params: UseStudioDraggableParams) {
         pe.preventDefault();
         fromId =
           (pe.currentTarget as HTMLElement).dataset.port?.split(":")[0] ?? null;
+        wiringBoardRect = canvas.getBoundingClientRect();
         pending.style.opacity = "1";
         fadeHint();
         onMove(pe);
