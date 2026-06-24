@@ -30,6 +30,19 @@ export default function Header() {
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  const navLockRef = useRef(false);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const remeasureRef = useRef<() => void>(() => {});
+
+  const armNavLock = useCallback(() => {
+    navLockRef.current = true;
+    clearTimeout(lockTimerRef.current);
+    lockTimerRef.current = setTimeout(() => {
+      navLockRef.current = false;
+      remeasureRef.current();
+    }, 150);
+  }, []);
+
   const updateIndicator = useCallback(() => {
     const nav = navRef.current;
     if (!nav) return;
@@ -54,18 +67,22 @@ export default function Header() {
 
   useEffect(() => {
     const TRIGGER = 120;
-    const targets = navItems
-      .map((item, i) => ({ i, el: item.href ? document.querySelector(item.href) : null }))
-      .filter((t): t is { i: number; el: Element } => t.el !== null);
-
+    let targets: { i: number; el: Element }[] = [];
     let tops: number[] = [];
     const measure = () => {
+      targets = navItems
+        .map((item, i) => ({ i, el: item.href ? document.querySelector(item.href) : null }))
+        .filter((t): t is { i: number; el: Element } => t.el !== null);
       const scrollY = window.scrollY;
       tops = targets.map((t) => t.el.getBoundingClientRect().top + scrollY);
     };
     measure();
 
     const onScroll = () => {
+      if (navLockRef.current) {
+        armNavLock();
+        return;
+      }
       const scrollY = window.scrollY;
       let current: number | null = null;
       targets.forEach((t, idx) => {
@@ -77,15 +94,18 @@ export default function Header() {
       measure();
       onScroll();
     };
+    remeasureRef.current = remeasure;
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", remeasure);
     window.addEventListener("app:layout-ready", remeasure);
+    window.addEventListener("app:sections-ready", remeasure);
     document.fonts?.ready.then(remeasure);
     onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", remeasure);
       window.removeEventListener("app:layout-ready", remeasure);
+      window.removeEventListener("app:sections-ready", remeasure);
     };
   }, []);
 
@@ -101,15 +121,21 @@ export default function Header() {
     return () => window.removeEventListener("resize", onResize);
   }, [updateIndicator]);
 
-  const goTo = (href: string) => {
+  const goTo = (href: string, index: number) => {
     setMobileOpen(false);
+    setActiveIndex(index);
+    armNavLock();
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
   const openContact = () => {
     setMobileOpen(false);
     setContactOpen(true);
   };
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollTop = () => {
+    setActiveIndex(null);
+    armNavLock();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const itemTone = (active: boolean, isContact: boolean) => {
     if (active) return "text-white";
@@ -125,7 +151,7 @@ export default function Header() {
             ref={navRef}
             className="relative flex h-14 items-center overflow-visible rounded-full px-2"
           >
-            <div className="pointer-events-none absolute inset-0 rounded-full bg-white/90 shadow-[0_10px_34px_rgba(0,0,0,0.20)] ring-1 ring-black/5 backdrop-blur-xl" />
+            <div className="nav-glass pointer-events-none absolute inset-0 rounded-full shadow-[0_10px_34px_rgba(0,0,0,0.20)] ring-1 ring-black/5" />
 
             <button
               onClick={scrollTop}
@@ -157,7 +183,7 @@ export default function Header() {
                   ref={(el) => {
                     itemRefs.current[i] = el;
                   }}
-                  onClick={() => (isContact ? openContact() : goTo(item.href!))}
+                  onClick={() => (isContact ? openContact() : goTo(item.href!, i))}
                   className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
                 >
                   <span
@@ -187,7 +213,7 @@ export default function Header() {
         <div className="pointer-events-auto ml-auto md:hidden">
           <button
             onClick={() => setMobileOpen(true)}
-            className="flex cursor-pointer items-center gap-2 rounded-full bg-white/90 px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-xl"
+            className="nav-glass flex cursor-pointer items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5"
           >
             <span className="h-2 w-2 rounded-full bg-flame" />
             Menu
@@ -202,7 +228,7 @@ export default function Header() {
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative m-4 w-64 rounded-3xl bg-white shadow-2xl"
+            className="nav-glass relative m-4 w-64 rounded-3xl shadow-2xl shadow-black/30 ring-1 ring-black/5"
             style={{ animation: "slideDown 0.28s ease-out both" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -224,7 +250,7 @@ export default function Header() {
                 <button
                   key={item.label}
                   onClick={() =>
-                    item.panel === "contact" ? openContact() : goTo(item.href!)
+                    item.panel === "contact" ? openContact() : goTo(item.href!, i)
                   }
                   className={`cursor-pointer rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
                     activeIndex === i
