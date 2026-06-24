@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { gsap, ScrollTrigger, SplitText, useGSAP } from "../../lib/gsap";
+import { gsap, SplitText, useGSAP } from "../../lib/gsap";
 import { brand } from "../../content/site";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 
@@ -16,6 +16,7 @@ export default function Preloader() {
     () => {
       if (reduced) {
         setDone(true);
+        globalThis.dispatchEvent(new Event("app:preload-done"));
         return;
       }
 
@@ -28,8 +29,8 @@ export default function Preloader() {
         defaults: { ease: "power3.inOut" },
         onComplete: () => {
           document.body.style.overflow = "";
-          ScrollTrigger.refresh();
           setDone(true);
+          globalThis.dispatchEvent(new Event("app:preload-done"));
         },
       });
 

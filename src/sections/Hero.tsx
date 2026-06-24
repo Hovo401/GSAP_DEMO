@@ -19,37 +19,44 @@ export default function Hero() {
   const spotlightRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  const titleRef = useSplitReveal<HTMLHeadingElement>("lines,words", "words", {
-    yPercent: 120,
-    opacity: 0,
-    duration: DURATION.slower,
-    ease: EASE.strongOut,
-    stagger: STAGGER.tight,
-    delay: 0.15,
-  });
+  const titleRef = useSplitReveal<HTMLHeadingElement>(
+    "lines,words",
+    "words",
+    {
+      yPercent: 120,
+      opacity: 0,
+      duration: DURATION.slower,
+      ease: EASE.strongOut,
+      stagger: STAGGER.tight,
+      delay: 0.15,
+    },
+    { startEvent: "app:preload-done" },
+  );
 
   useGSAP(
     () => {
       if (reduced || !contentRef.current) return;
 
-      gsap.from(".hero-meta", {
+      const metaReveal = gsap.from(".hero-meta", {
         opacity: 0,
         duration: DURATION.slower,
         ease: EASE.softOut,
         stagger: STAGGER.base,
         delay: 0.2,
+        paused: true,
       });
 
-      gsap.from(".hero-fade", {
+      const fadeReveal = gsap.from(".hero-fade", {
         y: 24,
         opacity: 0,
         duration: DURATION.slow,
         ease: EASE.out,
         stagger: STAGGER.loose,
         delay: 0.5,
+        paused: true,
       });
 
-      gsap.to(".hero-glow", {
+      const glowLoop = gsap.to(".hero-glow", {
         scale: 1.18,
         opacity: 0.85,
         duration: 5,
@@ -57,14 +64,16 @@ export default function Hero() {
         repeat: -1,
         yoyo: true,
         stagger: 1.4,
+        paused: true,
       });
 
-      gsap.to(spotlightRef.current, {
+      const spotlightLoop = gsap.to(spotlightRef.current, {
         filter: "hue-rotate(25deg)",
         duration: 4,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
+        paused: true,
       });
 
       gsap.to(contentRef.current, {
@@ -84,15 +93,32 @@ export default function Hero() {
       gsap.set(spotlightRef.current, { xPercent: -50, yPercent: -50 });
       gsap.set(hintRef.current, { xPercent: -50 });
 
-      gsap.to(hintRef.current, {
+      const hintLoop = gsap.to(hintRef.current, {
         y: 10,
         repeat: -1,
         yoyo: true,
         duration: 1,
         ease: "sine.inOut",
+        paused: true,
       });
 
-      if (!window.matchMedia("(pointer: fine)").matches) return;
+      const revealHero = () => {
+        metaReveal.play();
+        fadeReveal.play();
+        glowLoop.play();
+        spotlightLoop.play();
+        hintLoop.play();
+      };
+      window.addEventListener("app:preload-done", revealHero, {
+        once: true,
+      });
+      const cleanups = [
+        () => window.removeEventListener("app:preload-done", revealHero),
+      ];
+
+      if (!window.matchMedia("(pointer: fine)").matches) {
+        return () => cleanups.forEach((fn) => fn());
+      }
 
       const quickToOpts = { duration: DURATION.medium, ease: "power3" };
       const gridX = gsap.quickTo(gridRef.current, "x", quickToOpts);
@@ -131,9 +157,14 @@ export default function Hero() {
 
       let lastX = 0;
       let lastY = 0;
+      let rect = root.current!.getBoundingClientRect();
+      const remeasure = () => {
+        rect = root.current!.getBoundingClientRect();
+      };
+      window.addEventListener("resize", remeasure);
+      window.addEventListener("scroll", remeasure, { passive: true });
 
       const onPointerMove = (e: PointerEvent) => {
-        const rect = root.current!.getBoundingClientRect();
         const nx = gsap.utils.clamp(
           -1,
           1,
@@ -150,12 +181,12 @@ export default function Hero() {
         lastY = e.clientY;
         const boost = gsap.utils.clamp(1, 1.7, 1 + speed / 35);
 
-        gridX(nx * -320);
-        gridY(ny * -320);
-        glowAX(nx * -600 * boost);
-        glowAY(ny * -460 * boost);
-        glowBX(nx * -520 * boost);
-        glowBY(ny * -640 * boost);
+        gridX(nx * -32);
+        gridY(ny * -32);
+        glowAX(nx * -60 * boost);
+        glowAY(ny * -46 * boost);
+        glowBX(nx * -52 * boost);
+        glowBY(ny * -64 * boost);
         tiltY(nx * 8);
         tiltX(ny * -8);
         titleX(nx * 26);
@@ -174,7 +205,12 @@ export default function Hero() {
       };
 
       window.addEventListener("pointermove", onPointerMove);
-      return () => window.removeEventListener("pointermove", onPointerMove);
+      return () => {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("resize", remeasure);
+        window.removeEventListener("scroll", remeasure);
+        cleanups.forEach((fn) => fn());
+      };
     },
     { scope: root, dependencies: [reduced] },
   );
@@ -199,11 +235,11 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           ref={glowARef}
-          className="hero-glow glow absolute top-1/4 left-1/4 h-[40vw] w-[40vw] opacity-50"
+          className="hero-glow glow absolute top-1/4 left-1/4 h-[40vw] w-[40vw] opacity-50 will-change-transform"
         />
         <div
           ref={glowBRef}
-          className="hero-glow glow absolute right-1/4 bottom-1/4 h-[32vw] w-[32vw] opacity-40"
+          className="hero-glow glow absolute right-1/4 bottom-1/4 h-[32vw] w-[32vw] opacity-40 will-change-transform"
         />
       </div>
 
@@ -223,7 +259,7 @@ export default function Hero() {
 
       <div
         ref={spotlightRef}
-        className="pointer-events-none absolute top-1/2 left-1/2 h-[40vw] w-[40vw] rounded-full"
+        className="pointer-events-none absolute top-1/2 left-1/2 h-[40vw] w-[40vw] rounded-full will-change-transform"
         style={{
           background:
             "radial-gradient(circle, color-mix(in srgb, var(--color-flame) 35%, transparent) 0%, transparent 60%)",

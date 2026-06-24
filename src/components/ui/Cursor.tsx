@@ -38,6 +38,7 @@ export default function Cursor() {
       const yTo = gsap.quickTo(wrap, "y", { duration: 0.45, ease: "power3" });
 
       let magnet: HTMLElement | null = null;
+      let magnetRect: DOMRect | null = null;
 
       const setCursorState = (state: "card" | "target" | "default" | "hidden") => {
         if (state === "hidden") {
@@ -79,10 +80,9 @@ export default function Cursor() {
       };
 
       const onMove = (e: PointerEvent) => {
-        if (magnet) {
-          const r = magnet.getBoundingClientRect();
-          const cx = r.left + r.width / 2;
-          const cy = r.top + r.height / 2;
+        if (magnet && magnetRect) {
+          const cx = magnetRect.left + magnetRect.width / 2;
+          const cy = magnetRect.top + magnetRect.height / 2;
           xTo(cx + (e.clientX - cx) * 0.25);
           yTo(cy + (e.clientY - cy) * 0.25);
         } else {
@@ -100,10 +100,12 @@ export default function Cursor() {
         if (studioNode) {
           setOnCard(false);
           magnet = null;
+          magnetRect = null;
           setCursorState("hidden");
         } else if (card) {
           setOnCard(true);
           magnet = null;
+          magnetRect = null;
           setCursorState("card");
         } else if (target) {
           setOnCard(false);
@@ -112,10 +114,12 @@ export default function Cursor() {
             r.width > globalThis.innerWidth * 0.6 ||
             r.height > globalThis.innerHeight * 0.6;
           magnet = oversized ? null : target;
+          magnetRect = oversized ? null : r;
           setCursorState("target");
         } else {
           setOnCard(false);
           magnet = null;
+          magnetRect = null;
           setCursorState("default");
         }
       };

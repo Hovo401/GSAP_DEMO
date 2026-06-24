@@ -54,18 +54,39 @@ export default function Header() {
 
   useEffect(() => {
     const TRIGGER = 120;
+    const targets = navItems
+      .map((item, i) => ({ i, el: item.href ? document.querySelector(item.href) : null }))
+      .filter((t): t is { i: number; el: Element } => t.el !== null);
+
+    let tops: number[] = [];
+    const measure = () => {
+      const scrollY = window.scrollY;
+      tops = targets.map((t) => t.el.getBoundingClientRect().top + scrollY);
+    };
+    measure();
+
     const onScroll = () => {
+      const scrollY = window.scrollY;
       let current: number | null = null;
-      navItems.forEach((item, i) => {
-        if (!item.href) return;
-        const el = document.querySelector(item.href);
-        if (el && el.getBoundingClientRect().top <= TRIGGER) current = i;
+      targets.forEach((t, idx) => {
+        if (tops[idx] - scrollY <= TRIGGER) current = t.i;
       });
       setActiveIndex(current);
     };
+    const remeasure = () => {
+      measure();
+      onScroll();
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", remeasure);
+    window.addEventListener("app:layout-ready", remeasure);
+    document.fonts?.ready.then(remeasure);
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", remeasure);
+      window.removeEventListener("app:layout-ready", remeasure);
+    };
   }, []);
 
   useEffect(() => {

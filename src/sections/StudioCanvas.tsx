@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import type { Draggable } from "../lib/gsap";
+import type { Draggable } from "gsap/Draggable";
 import { studio } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import {
