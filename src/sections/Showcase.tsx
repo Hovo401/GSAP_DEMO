@@ -4,6 +4,7 @@ import { showcase, showcaseIntro } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScramble } from "../hooks/useScramble";
 import { CaseOverlay } from "./showcase/CaseOverlay";
+import { useShowcaseBlob } from "./showcase/useShowcaseBlob";
 import type { Project } from "./showcase/types";
 
 export default function Showcase() {
@@ -13,7 +14,16 @@ export default function Showcase() {
   const introHeadingRef = useScramble<HTMLHeadingElement>(showcaseIntro.title);
 
   const cardRefs = useRef<Record<string, HTMLElement | null>>({});
+  const leadBlobRef = useRef<HTMLDivElement>(null);
+  const satelliteRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState<Project | null>(null);
+
+  useShowcaseBlob(
+    root,
+    trackRef,
+    { lead: leadBlobRef, satellites: satelliteRefs },
+    reduced,
+  );
 
   useGSAP(
     () => {
@@ -69,14 +79,34 @@ export default function Showcase() {
     >
       <div
         ref={trackRef}
-        className="flex h-screen w-max items-center will-change-transform"
+        className="relative flex h-screen w-max items-center will-change-transform"
       >
+        <div
+          ref={leadBlobRef}
+          aria-hidden
+          className="showcase-blob pointer-events-none absolute top-0 left-0 z-10 h-12 w-12 md:h-24 md:w-24"
+        >
+          <div className="showcase-blob-aura" />
+          <div className="showcase-blob-shape h-full w-full" />
+        </div>
+        {[0, 1].map((i) => (
+          <div
+            key={i}
+            ref={(el) => {
+              satelliteRefs.current[i] = el;
+            }}
+            aria-hidden
+            className="showcase-blob showcase-blob-sat pointer-events-none absolute top-0 left-0 z-10"
+          />
+        ))}
+
         <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
           <p className="text-sm font-medium tracking-[0.4em] text-flame uppercase">
             {showcaseIntro.kicker}
           </p>
           <h2
             ref={introHeadingRef}
+            data-blob-start
             className="font-display mt-4 text-[18vw] leading-[0.85] uppercase md:text-[9vw]"
           >
             {showcaseIntro.title}
@@ -93,7 +123,7 @@ export default function Showcase() {
         {showcase.map((item) => (
           <article
             key={item.no}
-            className="showcase-card group flex h-full w-[82vw] shrink-0 items-center px-3 sm:w-[58vw] md:w-[34vw]"
+            className="showcase-card group flex h-full w-[82vw] shrink-0 items-end pb-[6vh] px-3 sm:w-[58vw] md:w-[34vw]"
           >
             <button
               type="button"
@@ -103,7 +133,7 @@ export default function Showcase() {
               }}
               onClick={() => setActive(item)}
               aria-label={`Open ${item.title} case study`}
-              className="relative flex h-[74vh] w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
+              className="relative flex h-[58vh] w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
             >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -122,7 +152,7 @@ export default function Showcase() {
                 {item.title}
               </h3>
 
-              <p className="card-reveal relative mt-auto max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
+              <p className="card-reveal relative mt-6 max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
                 {item.body}
               </p>
             </button>
@@ -130,7 +160,10 @@ export default function Showcase() {
         ))}
 
         <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
-          <h2 className="font-display text-[14vw] leading-[0.85] uppercase md:text-[7vw]">
+          <h2
+            data-blob-end
+            className="font-display text-[14vw] leading-[0.85] uppercase md:text-[7vw]"
+          >
             Want
             <br />
             yours?

@@ -46,7 +46,11 @@ export default function Home() {
           ? globalThis.requestIdleCallback
           : (cb: () => void) => setTimeout(cb, 100);
       const next = (i: number) => {
-        if (cancelled || i >= loaders.length) return;
+        if (cancelled) return;
+        if (i >= loaders.length) {
+          requestAnimationFrame(() => globalThis.dispatchEvent(new Event("app:sections-ready")));
+          return;
+        }
         idle(() => {
           loaders[i]().finally(() => next(i + 1));
         });

@@ -13,15 +13,16 @@ export default function TextReveal() {
     () => {
       if (reduced || !textRef.current) return;
 
-      const split = new SplitText(textRef.current, { type: "words" });
+      const split = new SplitText(textRef.current, { type: "chars" });
 
       gsap.fromTo(
-        split.words,
+        split.chars,
         { opacity: 0.15 },
         {
           opacity: 1,
+          duration: 0.18,
           ease: EASE.none,
-          stagger: 0.5,
+          stagger: 0.025,
           scrollTrigger: {
             trigger: root.current,
             start: "top top",
