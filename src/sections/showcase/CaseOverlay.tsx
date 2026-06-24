@@ -18,6 +18,7 @@ export function CaseOverlay({
   const panelRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLButtonElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
 
   const close = () => {
@@ -126,8 +127,27 @@ export function CaseOverlay({
         );
     }
 
+    let onPointerMove: ((e: PointerEvent) => void) | undefined;
+    if (!reduced && glowRef.current) {
+      gsap.set(glowRef.current, { xPercent: -50, yPercent: -50 });
+      const glowX = gsap.quickTo(glowRef.current, "x", {
+        duration: 0.4,
+        ease: "power3",
+      });
+      const glowY = gsap.quickTo(glowRef.current, "y", {
+        duration: 0.4,
+        ease: "power3",
+      });
+      onPointerMove = (e: PointerEvent) => {
+        glowX(e.clientX - window.innerWidth / 2);
+        glowY(e.clientY - window.innerHeight / 2);
+      };
+      window.addEventListener("pointermove", onPointerMove);
+    }
+
     return () => {
       globalThis.removeEventListener("keydown", onKey);
+      if (onPointerMove) window.removeEventListener("pointermove", onPointerMove);
       document.body.style.overflow = prevOverflow;
       tl?.kill();
     };
@@ -154,6 +174,16 @@ export function CaseOverlay({
           ref={innerRef}
           className="relative flex h-full flex-col justify-between p-8 md:p-16"
         >
+          <div
+            ref={glowRef}
+            className="pointer-events-none absolute top-1/2 left-1/2 h-[50vw] w-[50vw] rounded-full will-change-transform"
+            style={{
+              background:
+                "radial-gradient(circle, color-mix(in srgb, var(--color-flame) 35%, transparent) 0%, transparent 60%)",
+              mixBlendMode: "screen",
+            }}
+          />
+
           <span className="font-display pointer-events-none absolute -bottom-16 -left-4 text-[40vw] leading-none opacity-[0.06] select-none md:text-[26vw]">
             {item.no}
           </span>
