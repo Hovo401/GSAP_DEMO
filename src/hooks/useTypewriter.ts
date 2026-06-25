@@ -6,7 +6,7 @@ import { SCROLL_START } from "../lib/motion";
 
 gsap.registerPlugin(TextPlugin);
 
-const CHARS_PER_SECOND = 70;
+const CHARS_PER_SECOND = 65;
 
 export function useTypewriter<T extends HTMLElement = HTMLParagraphElement>(
   text: string,
