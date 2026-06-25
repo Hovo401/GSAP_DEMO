@@ -236,13 +236,50 @@ export const studio = {
   ] satisfies StudioPage[],
 };
 
+export type SocialLink = {
+  key: "email" | "github" | "linkedin" | "telegram";
+  href: string;
+  handle: string;
+};
+
+export const socialLinks: SocialLink[] = [
+  {
+    key: "email",
+    href: "mailto:hovo.55.k.yan@gmail.com",
+    handle: "hovo.55.k.yan@gmail.com",
+  },
+  { key: "github", href: "https://github.com/Hovo401", handle: "github.com/Hovo401" },
+  {
+    key: "linkedin",
+    href: "https://www.linkedin.com/in/hovo401",
+    handle: "linkedin.com/in/hovo401",
+  },
+  { key: "telegram", href: "https://t.me/hovo401", handle: "@hovo401" },
+];
+
 export const approachTones: ("ink" | "flame")[] = ["ink", "flame", "ink", "flame"];
 
 export const stats = [
   { value: 6, suffix: "+" },
-  { value: 40, suffix: "+" },
-  { value: 99, suffix: "%" },
-  { value: 100, suffix: "%" },
+  { value: 20, suffix: "+" },
+];
+
+export const aboutStack = [
+  {
+    items: [
+      "Node.js",
+      "TypeScript",
+      "Nest.js",
+      "PostgreSQL",
+      "MongoDB",
+      "Redis",
+      "REST & GraphQL",
+      "Docker · CI/CD",
+    ],
+  },
+  {
+    items: ["React", "Next.js", "TypeScript", "Zustand", "TanStack Query", "Tailwind CSS"],
+  },
 ];
 
 export const magicSection = {

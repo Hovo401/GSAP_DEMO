@@ -1,11 +1,17 @@
 import { useTranslation } from "react-i18next";
-import { brand, nav } from "../content/site";
+import { brand, nav, socialLinks } from "../content/site";
+import { useContactPanelStore } from "../store/useContactPanelStore";
 
 export default function Footer() {
   const { t } = useTranslation();
+  const openContact = useContactPanelStore((s) => s.openContact);
   const footerLinks = t("footer.links", { returnObjects: true }) as string[];
   const scrollTop = () =>
     window.scrollTo({ top: 0, behavior: "smooth" });
+  const goTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <footer className="relative overflow-hidden border-t-2 border-paper/15 bg-ink px-6 pt-16 pb-8 md:px-12">
@@ -23,33 +29,50 @@ export default function Footer() {
               <p className="text-xs font-medium tracking-[0.3em] text-paper/35 uppercase">
                 {t("footer.menu")}
               </p>
-              {nav.map((item) => (
-                <a
-                  key={item.key}
-                  href={item.href}
-                  className="text-sm text-paper/70 transition-colors duration-200 hover:text-flame"
-                >
-                  {t(`nav.${item.key}`)}
-                </a>
-              ))}
+              {nav.map((item) =>
+                item.panel === "contact" ? (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={openContact}
+                    className="text-left text-sm text-paper/70 transition-colors duration-200 hover:text-flame"
+                  >
+                    {t(`nav.${item.key}`)}
+                  </button>
+                ) : (
+                  <a
+                    key={item.key}
+                    href={item.href}
+                    onClick={(e) => goTo(e, item.href!)}
+                    className="text-sm text-paper/70 transition-colors duration-200 hover:text-flame"
+                  >
+                    {t(`nav.${item.key}`)}
+                  </a>
+                ),
+              )}
             </nav>
 
             <nav className="flex flex-col gap-3">
               <p className="text-xs font-medium tracking-[0.3em] text-paper/35 uppercase">
                 {t("footer.elsewhere")}
               </p>
-              {footerLinks.map((link) => (
-                <a
-                  key={link}
-                  href="#"
-                  className="group flex items-center gap-2 text-sm text-paper/70 transition-colors duration-200 hover:text-flame"
-                >
-                  {link}
-                  <span className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    ↗
-                  </span>
-                </a>
-              ))}
+              {footerLinks.map((link, index) => {
+                const social = socialLinks[index];
+                return (
+                  <a
+                    key={link}
+                    href={social.href}
+                    target={social.key === "email" ? undefined : "_blank"}
+                    rel={social.key === "email" ? undefined : "noopener noreferrer"}
+                    className="group flex items-center gap-2 text-sm text-paper/70 transition-colors duration-200 hover:text-flame"
+                  >
+                    {link}
+                    <span className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      ↗
+                    </span>
+                  </a>
+                );
+              })}
             </nav>
           </div>
         </div>

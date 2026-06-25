@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { nav as navItems } from "../../content/site";
+import { nav as navItems, type NavItem } from "../../content/site";
 import ContactPanel from "../ui/ContactPanel";
+import { useContactPanelStore } from "../../store/useContactPanelStore";
 
 const HOME_LEFT = -46;
 const DOT_SIZE = 34;
@@ -29,13 +30,16 @@ export default function Header() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [pill, setPill] = useState<Pill>({ ...HOME_PILL, opacity: 0 });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
+  const { open: contactOpen, openContact: openContactStore, closeContact } =
+    useContactPanelStore();
 
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const navLockRef = useRef(false);
-  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const remeasureRef = useRef<() => void>(() => {});
 
   const armNavLock = useCallback(() => {
@@ -75,7 +79,10 @@ export default function Header() {
     let tops: number[] = [];
     const measure = () => {
       targets = navItems
-        .map((item, i) => ({ i, el: item.href ? document.querySelector(item.href) : null }))
+        .map((item, i) => ({
+          i,
+          el: item.href ? document.querySelector(item.href) : null,
+        }))
         .filter((t): t is { i: number; el: Element } => t.el !== null);
       const scrollY = window.scrollY;
       tops = targets.map((t) => t.el.getBoundingClientRect().top + scrollY);
@@ -133,7 +140,7 @@ export default function Header() {
   };
   const openContact = () => {
     setMobileOpen(false);
-    setContactOpen(true);
+    openContactStore();
   };
   const scrollTop = () => {
     setActiveIndex(null);
@@ -141,9 +148,10 @@ export default function Header() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const itemTone = (active: boolean, isContact: boolean) => {
+  const itemTone = (active: boolean, key: NavItem["key"]) => {
     if (active) return "text-white";
-    if (isContact) return "bg-black/[0.06] text-ink hover:bg-black/[0.1]";
+    if (key === "contact")
+      return "bg-black/[0.06] text-ink hover:bg-black/[0.1]";
     return "text-ink/75 hover:text-ink";
   };
 
@@ -194,8 +202,10 @@ export default function Header() {
                   ref={(el) => {
                     itemRefs.current[i] = el;
                   }}
-                  onClick={() => (isContact ? openContact() : goTo(item.href!, i))}
-                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
+                  onClick={() =>
+                    isContact ? openContact() : goTo(item.href!, i)
+                  }
+                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, item.key)}`}
                 >
                   <span
                     className={`block h-6 overflow-hidden ${active ? "" : "group/label"}`}
@@ -257,21 +267,25 @@ export default function Header() {
             </div>
             <div className="mx-5 h-px bg-black/5" />
             <nav className="flex flex-col px-3 py-3">
-              {navItems.map((item, i) => (
-                <button
-                  key={item.key}
-                  onClick={() =>
-                    item.panel === "contact" ? openContact() : goTo(item.href!, i)
-                  }
-                  className={`cursor-pointer rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
-                    activeIndex === i
-                      ? "bg-flame text-white"
-                      : "text-ink/80 hover:bg-black/5"
-                  }`}
-                >
-                  {t(`nav.${item.key}`)}
-                </button>
-              ))}
+              {navItems.map((item, i) => {
+                const mobileTone =
+                  activeIndex === i
+                    ? "bg-flame text-white"
+                    : "text-ink/80 hover:bg-black/5";
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() =>
+                      item.panel === "contact"
+                        ? openContact()
+                        : goTo(item.href!, i)
+                    }
+                    className={`cursor-pointer rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${mobileTone}`}
+                  >
+                    {t(`nav.${item.key}`)}
+                  </button>
+                );
+              })}
             </nav>
             <div className="mx-5 h-px bg-black/5" />
             <div className="flex items-center gap-1 px-3 py-3">
@@ -295,7 +309,7 @@ export default function Header() {
         </div>
       )}
 
-      <ContactPanel open={contactOpen} onClose={() => setContactOpen(false)} />
+      <ContactPanel open={contactOpen} onClose={closeContact} />
     </>
   );
 }

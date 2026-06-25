@@ -19,22 +19,16 @@
   },
   "contactPanel": {
     "eyebrow": "Get in touch",
-    "title": "Tell us about your project",
-    "ariaContactUs": "Contact us",
+    "title": "Let's connect",
+    "subtitle": "No contact form here — just pick whichever works for you.",
+    "ariaContactUs": "Contact links",
     "ariaClose": "Close contact panel",
-    "fields": {
-      "name": { "label": "What is your name?", "placeholder": "Full Name" },
-      "email": { "label": "What is your email?", "placeholder": "Email Address" },
-      "company": {
-        "label": "What is the name of your company?",
-        "placeholder": "Company Name"
-      },
-      "message": {
-        "label": "Tell us a bit more about your project",
-        "placeholder": "We are looking to…"
-      }
-    },
-    "submit": "Send message"
+    "links": {
+      "email": "Email",
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "telegram": "Telegram"
+    }
   },
   "hero": {
     "kicker": "Full-stack development studio",
@@ -153,26 +147,23 @@
     ]
   },
   "statsIntro": {
-    "kicker": "By the numbers",
-    "heading": "Proof, not promises",
-    "body": "A track record built across real client projects, not slideware."
+    "kicker": "About",
+    "heading": "Hovhannes Karapetyan",
+    "role": "Software Engineer · Founder of Diotek",
+    "bio": "I'm a software engineer building reliable, scalable web products end to end — from API and database design to the interfaces people actually use. I care about secure, fast software and modern engineering practices on real projects.",
+    "stack": {
+      "backend": "Backend",
+      "frontend": "Frontend"
+    }
   },
   "stats": {
     "items": [
       { "label": "years building software" },
-      { "label": "projects shipped" },
-      { "label": "on-time delivery" },
-      { "label": "client satisfaction" }
+      { "label": "technologies in the stack" }
     ]
   },
   "magicSection": {
     "phrase": "Ready to *build something real?*"
-  },
-  "cta": {
-    "eyebrow": "Ready?",
-    "title": "Let's build it",
-    "subtitle": "Tell us what you're building. No credit card, no ceremony — just a conversation.",
-    "button": "Start a project"
   },
   "footer": {
     "note": "Available for freelance and contract work.",

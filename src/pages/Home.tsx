@@ -12,7 +12,6 @@ const sectionLoaders = {
   StudioCanvas: () => import("../sections/StudioCanvas"),
   Approach: () => import("../sections/Approach"),
   Stats: () => import("../sections/Stats"),
-  CTA: () => import("../sections/CTA"),
   MagicReveal: () => import("../sections/MagicReveal"),
   Footer: () => import("../sections/Footer"),
 };
@@ -22,7 +21,6 @@ const Features = lazy(sectionLoaders.Features);
 const StudioCanvas = lazy(sectionLoaders.StudioCanvas);
 const Approach = lazy(sectionLoaders.Approach);
 const Stats = lazy(sectionLoaders.Stats);
-const CTA = lazy(sectionLoaders.CTA);
 const MagicReveal = lazy(sectionLoaders.MagicReveal);
 const Footer = lazy(sectionLoaders.Footer);
 
@@ -104,7 +102,6 @@ export default function Home() {
         <Approach />
         <Stats />
         <MagicReveal />
-        <CTA />
         <Footer />
       </Suspense>
     </div>
