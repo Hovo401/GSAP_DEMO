@@ -122,7 +122,11 @@ export function CaseOverlay({
         const state = Flip.getState(panel, { props: "borderRadius" });
 
         gsap.set(panelText, { opacity: 0, x: SWAP_X });
-        gsap.to(backdrop, { opacity: 1, duration: DURATION.base, ease: EASE.softOut });
+        gsap.to(backdrop, {
+          opacity: 1,
+          duration: DURATION.base,
+          ease: EASE.softOut,
+        });
 
         gsap.to(cardText, {
           x: -SWAP_X,
@@ -192,7 +196,7 @@ export function CaseOverlay({
         </div>
 
         <p className="case-stagger relative mt-12 text-sm font-medium text-paper/40 md:mt-20">
-          ({item.no})
+          {/* ({item.no}) */}
         </p>
         <h3 className="case-stagger font-display relative mt-2 text-[clamp(2.5rem,9vw,8rem)] leading-[0.9] text-flame uppercase">
           {item.title}
