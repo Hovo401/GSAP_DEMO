@@ -4,7 +4,9 @@ import { gsap, useGSAP } from "../lib/gsap";
 import { stats as statValues, aboutStack } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScramble } from "../hooks/useScramble";
+import { useTypewriter } from "../hooks/useTypewriter";
 import { EASE, SCROLL_START } from "../lib/motion";
+import TiltCard from "../components/ui/TiltCard";
 
 type StatLabel = { label: string };
 
@@ -14,6 +16,8 @@ export default function Stats() {
   const reduced = useReducedMotion();
   const heading = t("statsIntro.heading");
   const headingRef = useScramble<HTMLHeadingElement>(heading);
+  const bio = t("statsIntro.bio");
+  const bioRef = useTypewriter<HTMLParagraphElement>(bio);
   const stats = (t("stats.items", { returnObjects: true }) as StatLabel[]).map(
     (item, i) => ({ ...statValues[i], ...item }),
   );
@@ -64,30 +68,35 @@ export default function Stats() {
         </div>
 
         <div className="grid gap-12 md:grid-cols-[280px_1fr] md:gap-16">
-          <div className="relative aspect-square w-full max-w-70 overflow-hidden rounded-2xl border-2 border-ink ring-4 ring-flame/20">
-            <img
-              src="/about/hovhannes.jpg"
-              alt={heading}
-              className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-            <span
-              aria-hidden
-              className="font-display flex h-full w-full items-center justify-center bg-ink/5 text-7xl text-ink/30"
-            >
-              HK
-            </span>
-          </div>
+          <TiltCard wrapperClassName="feature-card" className="">
+            <div className="relative aspect-square w-full max-w-70 overflow-hidden rounded-2xl border-2 border-ink ring-4 ring-flame/20">
+              <img
+                src="/avatar.jpeg"
+                alt={heading}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+              <span
+                aria-hidden
+                className="font-display flex h-full w-full items-center justify-center bg-ink/5 text-7xl text-ink/30"
+              >
+                HK
+              </span>
+            </div>
+          </TiltCard>
 
           <div>
             <p className="text-sm font-medium tracking-[0.2em] text-flame uppercase">
               {t("statsIntro.role")}
             </p>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed font-light text-ink/70">
-              {t("statsIntro.bio")}
+            <p
+              ref={bioRef}
+              className="mt-5 max-w-xl text-lg leading-relaxed font-light text-ink/70"
+            >
+              {bio}
             </p>
 
             <div className="mt-10 grid gap-x-12 gap-y-6 sm:grid-cols-2">
