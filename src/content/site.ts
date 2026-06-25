@@ -310,24 +310,32 @@ export const showcase = [
     title: "Aurora",
     tag: "Product launch",
     body: "A launch site built to convert. Scroll-linked product reveals and pinned feature beats keep visitors moving toward the buy — every frame earns the next scroll.",
+    detail:
+      "Built in six weeks alongside the product team, the launch site pairs a horizontal feature reel with a sticky add-to-cart bar. Conversion lifted 34% over the static page it replaced.",
   },
   {
     no: "02",
     title: "Meridian",
     tag: "Brand site",
     body: "A brand world rebuilt for motion. Bold type, fluid transitions, and a homepage that grabs attention from the first frame and never lets the eye rest.",
+    detail:
+      "The homepage swaps in three hero treatments depending on referrer, but every path lands on the same physics-driven type system — built once, reused across every campaign page since.",
   },
   {
     no: "03",
     title: "Halcyon",
     tag: "Editorial",
     body: "An editorial platform where reading feels alive. Typographic reveals and parallax imagery add depth without ever fighting the content itself.",
+    detail:
+      "Each article gets its own pacing: drop caps animate in, inline imagery parallaxes against the reading column, and a progress rail tracks how far there is left to go.",
   },
   {
     no: "04",
     title: "Vantage",
     tag: "Case study",
     body: "A data story told through scroll. Animated counters and staged reveals turn dense numbers into a narrative anyone can follow at a glance.",
+    detail:
+      "Three years of usage data compressed into a single scroll: counters tick up against scrubbed line charts, and every section ends on the number that mattered most to the client.",
   },
 ];
 

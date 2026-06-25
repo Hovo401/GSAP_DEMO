@@ -5,6 +5,8 @@ import { DURATION, EASE, STAGGER } from "../../lib/motion";
 import type { Project } from "./types";
 
 const FLIP_EASE = "power3.inOut";
+const SWAP_X = 40;
+const SWAP_DURATION = 0.22;
 
 function isOnscreen(el: HTMLElement) {
   const r = el.getBoundingClientRect();
@@ -43,7 +45,13 @@ export function CaseOverlay({
     }
     gsap
       .timeline({ onComplete: onClose })
-      .to(panel, { autoAlpha: 0, y: 24, scale: 0.97, duration: DURATION.fast, ease: EASE.in })
+      .to(panel, {
+        autoAlpha: 0,
+        y: 24,
+        scale: 0.97,
+        duration: DURATION.fast,
+        ease: EASE.in,
+      })
       .to(backdrop, { opacity: 0, duration: DURATION.fast }, 0);
   };
 
@@ -58,24 +66,26 @@ export function CaseOverlay({
       return;
     }
 
-    gsap.to(panel.querySelectorAll(".case-stagger"), {
-      opacity: 0,
-      y: 12,
-      duration: DURATION.fast / 2,
-      ease: EASE.in,
-    });
     gsap.to(backdrop, { opacity: 0, duration: DURATION.base, ease: EASE.in });
 
-    const state = Flip.getState(panel, { props: "borderRadius" });
-    Flip.fit(panel, sourceEl, { scale: true, props: "borderRadius" });
-    Flip.from(state, {
-      duration: DURATION.base,
-      ease: FLIP_EASE,
-      scale: true,
-      props: "borderRadius",
+    gsap.to(panel.querySelectorAll(".case-stagger"), {
+      x: SWAP_X,
+      opacity: 0,
+      stagger: STAGGER.tight,
+      duration: SWAP_DURATION,
+      ease: EASE.in,
       onComplete: () => {
-        gsap.set(sourceEl, { autoAlpha: 1 });
-        onClose();
+        const state = Flip.getState(panel, { props: "borderRadius" });
+        Flip.fit(panel, sourceEl, { props: "borderRadius" });
+        Flip.from(state, {
+          duration: DURATION.base,
+          ease: FLIP_EASE,
+          props: "borderRadius",
+          onComplete: () => {
+            gsap.set(sourceEl, { autoAlpha: 1 });
+            onClose();
+          },
+        });
       },
     });
   };
@@ -97,33 +107,43 @@ export function CaseOverlay({
       };
       globalThis.addEventListener("keydown", onKey);
 
-      const reveal = panel.querySelectorAll(".case-stagger");
+      const panelText = panel.querySelectorAll(".case-stagger");
 
       if (reduced || !sourceEl || !isOnscreen(sourceEl)) {
         gsap.set(backdrop, { opacity: 1 });
-        gsap.set(reveal, { opacity: 1, y: 0 });
+        gsap.set(panelText, { opacity: 1, x: 0 });
       } else {
-        gsap.set(reveal, { opacity: 0, y: 20 });
+        const card = sourceEl;
+        const cardText = card.querySelectorAll(".card-reveal");
 
-        Flip.fit(panel, sourceEl, { scale: true, props: "borderRadius" });
+        Flip.fit(panel, card, { props: "borderRadius" });
         const state = Flip.getState(panel, { props: "borderRadius" });
-        gsap.set(panel, { clearProps: "all" });
-        gsap.set(sourceEl, { autoAlpha: 0 });
 
+        gsap.set(panelText, { opacity: 0, x: SWAP_X });
         gsap.to(backdrop, { opacity: 1, duration: DURATION.base, ease: EASE.softOut });
-        Flip.from(state, {
-          duration: DURATION.slow,
-          ease: FLIP_EASE,
-          scale: true,
-          props: "borderRadius",
-        });
-        gsap.to(reveal, {
-          opacity: 1,
-          y: 0,
+
+        gsap.to(cardText, {
+          x: -SWAP_X,
+          opacity: 0,
           stagger: STAGGER.tight,
-          duration: DURATION.fast,
+          duration: SWAP_DURATION,
+          ease: EASE.in,
+        });
+        gsap.to(panelText, {
+          x: 0,
+          opacity: 1,
+          stagger: STAGGER.tight,
+          duration: SWAP_DURATION,
           ease: EASE.out,
-          delay: DURATION.slow * 0.55,
+          onComplete: () => {
+            gsap.set(card, { autoAlpha: 0 });
+            gsap.set(panel, { clearProps: "all" });
+            Flip.from(state, {
+              duration: DURATION.base,
+              ease: FLIP_EASE,
+              props: "borderRadius",
+            });
+          },
         });
       }
 
@@ -154,8 +174,8 @@ export function CaseOverlay({
           {item.no}
         </span>
 
-        <div className="case-stagger relative flex items-start justify-between gap-4">
-          <span className="inline-block rounded-full border border-paper/20 px-4 py-1.5 text-xs font-medium tracking-[0.25em] text-paper/70 uppercase">
+        <div className="relative flex items-start justify-between gap-4">
+          <span className="case-stagger inline-block rounded-full border border-paper/20 px-4 py-1.5 text-xs font-medium tracking-[0.25em] text-paper/70 uppercase">
             {item.tag}
           </span>
           <button
@@ -177,6 +197,9 @@ export function CaseOverlay({
         </h3>
         <p className="case-stagger relative mt-8 max-w-xl text-lg leading-relaxed text-paper/65 md:text-xl">
           {item.body}
+        </p>
+        <p className="case-stagger relative mt-6 max-w-xl text-base leading-relaxed text-paper/45 md:text-lg">
+          {item.detail}
         </p>
       </div>
     </div>,
