@@ -269,13 +269,13 @@ export default function Hero() {
       />
 
       <span className="hero-meta absolute top-24 left-6 hidden text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:left-10">
-        Est. 2026
+        {hero.metaTopLeft}
       </span>
       <span className="hero-meta absolute top-24 right-6 hidden text-right text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:right-10">
-        v1.0 / GSAP
+        {hero.metaTopRight}
       </span>
       <span className="hero-meta absolute bottom-10 left-6 hidden text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:left-10">
-        40°N — 44°E
+        {hero.metaBottom}
       </span>
 
       <div

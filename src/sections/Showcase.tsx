@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { gsap, useGSAP } from "../lib/gsap";
-import { showcase, showcaseIntro } from "../content/site";
+import { showcase, showcaseIntro, showcaseOutro } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScramble } from "../hooks/useScramble";
 import { CaseOverlay } from "./showcase/CaseOverlay";
@@ -159,7 +159,7 @@ export default function Showcase() {
           </p>
           <p className="mt-10 flex items-center gap-3 text-xs font-medium tracking-[0.3em] text-paper/40 uppercase">
             <span className="h-px w-10 bg-paper/40" />
-            Scroll sideways
+            {showcaseIntro.scrollHint}
           </p>
         </div>
 
@@ -208,15 +208,15 @@ export default function Showcase() {
             data-blob-end
             className="font-display text-[14vw] leading-[0.85] uppercase md:text-[7vw]"
           >
-            Want
+            {showcaseOutro.headingLines[0]}
             <br />
-            yours?
+            {showcaseOutro.headingLines[1]}
           </h2>
           <a
             href="#cta"
             className="mt-10 inline-flex w-fit items-center gap-3 border-2 border-paper px-8 py-4 text-sm font-bold tracking-widest text-paper uppercase transition-colors duration-200 hover:bg-paper hover:text-ink"
           >
-            Start a project ↗
+            {showcaseOutro.cta}
           </a>
         </div>
       </div>

@@ -56,7 +56,7 @@ export default function CTA() {
       <div className="cta-plate absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-ink/20" />
 
       <p className="cta-fade relative text-sm font-medium tracking-[0.4em] uppercase">
-        Ready?
+        {cta.eyebrow}
       </p>
       <h2
         ref={titleRef}

@@ -1,12 +1,12 @@
 export const brand = {
-  name: "MOTIVE",
-  tagline: "Motion design engine",
+  name: "Diotek",
+  tagline: "Full-stack development studio",
 };
 
 export type NavItem = { label: string; href?: string; panel?: "contact" };
 
 export const nav: NavItem[] = [
-  { label: "Work", href: "#showcase" },
+  { label: "Insights", href: "#showcase" },
   { label: "Services", href: "#features" },
   { label: "Approach", href: "#approach" },
   { label: "About", href: "#stats" },
@@ -14,8 +14,8 @@ export const nav: NavItem[] = [
 ];
 
 export const contactPanel = {
-  eyebrow: "Contact us",
-  title: "Have a project you’d like to talk about?",
+  eyebrow: "Get in touch",
+  title: "Tell us about your project",
   fields: {
     name: { label: "What is your name?", placeholder: "Full Name" },
     email: { label: "What is your email?", placeholder: "Email Address" },
@@ -32,25 +32,28 @@ export const contactPanel = {
 };
 
 export const hero = {
-  kicker: "Motion design engine",
-  titleLines: ["Animate", "anything"],
-  accentWord: "anything",
-  subtitle: "Ship buttery scroll experiences without fighting the timeline.",
-  scrollHint: "Scroll to feel it",
+  kicker: "Full-stack development studio",
+  titleLines: ["Build it", "right"],
+  accentWord: "right",
+  subtitle: "We design, build and ship fast, polished web products — from landing pages to full-stack apps.",
+  scrollHint: "Scroll to see how",
+  metaTopLeft: "Available for work",
+  metaTopRight: "React / TypeScript / Node",
+  metaBottom: "Remote — worldwide",
 };
 
 export const manifesto =
-  "We build the web's future, pixel by pixel. Obsessive about detail, ruthless about smoothness — that is the whole point.";
+  "We treat every project like it's our own product. Clean code, fast load times, and pixel-true interfaces — no shortcuts, no excuses.";
 
 export const marqueeWords = [
-  "SCROLL",
-  "PIN",
-  "PARALLAX",
-  "STAGGER",
-  "SCRUB",
-  "TIMELINE",
-  "EASE",
-  "REVEAL",
+  "REACT",
+  "TYPESCRIPT",
+  "NODE",
+  "API",
+  "SHIP",
+  "SCALE",
+  "DEPLOY",
+  "CLEAN CODE",
 ];
 
 export type StudioNode = {
@@ -75,10 +78,11 @@ export type StudioPage = {
 };
 
 export const studio = {
-  kicker: "How we build",
-  title: "Sketch how it moves",
+  kicker: "How we work",
+  title: "Sketch how it's built",
   hint: "Drag the notes, wire outputs to inputs, edit the text — make it your own diagram.",
   watermark: "Studio",
+  footnote: "The build pipeline behind every Diotek project.",
   dragHint: "Drag a port to connect",
   addNoteLabel: "Add note",
   downloadLabel: "Download image",
@@ -91,7 +95,7 @@ export const studio = {
   pages: [
     {
       id: "page-1",
-      name: "SITE",
+      name: "Web App",
       nodes: [
         {
           id: "brief",
@@ -110,17 +114,17 @@ export const studio = {
           y: 368,
         },
         {
-          id: "motion",
-          label: "Motion",
-          sub: "GSAP scroll magic",
+          id: "frontend",
+          label: "Frontend",
+          sub: "React, built to last",
           kind: "fx",
           x: 425,
           y: 782,
         },
         {
-          id: "build",
-          label: "Build",
-          sub: "React, built to last",
+          id: "backend",
+          label: "Backend",
+          sub: "API, database, auth",
           kind: "fx",
           x: 765,
           y: 575,
@@ -128,15 +132,15 @@ export const studio = {
         {
           id: "performance",
           label: "Performance",
-          sub: "60fps, sub-second load",
+          sub: "fast load, no jank",
           kind: "fx",
           x: 1105,
           y: 368,
         },
         {
-          id: "seo",
-          label: "SEO",
-          sub: "found, not just built",
+          id: "testing",
+          label: "Testing",
+          sub: "checked, not hoped",
           kind: "fx",
           x: 1105,
           y: 782,
@@ -152,13 +156,13 @@ export const studio = {
       ],
       links: [
         { from: "brief", to: "design" },
-        { from: "brief", to: "motion" },
-        { from: "design", to: "build" },
-        { from: "motion", to: "build" },
-        { from: "build", to: "performance" },
-        { from: "build", to: "seo" },
+        { from: "brief", to: "frontend" },
+        { from: "design", to: "backend" },
+        { from: "frontend", to: "backend" },
+        { from: "backend", to: "performance" },
+        { from: "backend", to: "testing" },
         { from: "performance", to: "livesite" },
-        { from: "seo", to: "livesite" },
+        { from: "testing", to: "livesite" },
       ],
     },
     {
@@ -275,149 +279,136 @@ export const studio = {
   ] satisfies StudioPage[],
 };
 
+export const featuresIntro = {
+  kicker: "What we do",
+  heading: "Built to ship",
+  body: "Four ways we help clients turn an idea into a live, working product.",
+};
+
 export const features = [
   {
     no: "01",
-    title: "Scroll-linked timelines",
-    body: "Bind any timeline to scroll progress with a single scrub value. No math, no jank.",
+    title: "Frontend & interfaces",
+    body: "Pixel-true UI built in React — fast, accessible, and animated when it earns its place.",
   },
   {
     no: "02",
-    title: "Pin & release",
-    body: "Pin sections in place while content plays out, then hand scroll back seamlessly.",
+    title: "Full-stack web apps",
+    body: "End-to-end products: frontend, backend, database and auth, shipped as one cohesive build.",
   },
   {
     no: "03",
-    title: "Split & stagger",
-    body: "Break headlines into lines, words or chars and reveal them with one call.",
+    title: "Landing pages",
+    body: "Conversion-focused sites for businesses — clear copy, fast load, built to bring in clients.",
   },
   {
     no: "04",
-    title: "Reduced-motion aware",
-    body: "Respects user preferences out of the box — accessible by default, premium by choice.",
+    title: "Backend & API",
+    body: "Server-side logic, APIs and third-party integrations that are reliable under real traffic.",
   },
 ];
 
 export const showcaseIntro = {
-  kicker: "Selected work",
-  title: "Our work",
-  body: "Teams trust MOTIVE to push creative boundaries and move fast when it matters — buttery scroll work, shipped.",
+  kicker: "Insights",
+  title: "What we know",
+  body: "A few things worth understanding before you hire anyone to build a website — explained the way we'd explain them to a client.",
+  scrollHint: "Scroll sideways",
+};
+
+export const showcaseOutro = {
+  headingLines: ["We do", "it all"],
+  cta: "Start a project ↗",
 };
 
 export const showcase = [
   {
     no: "01",
-    title: "Aurora",
-    tag: "Product launch",
-    body: "A launch site built to convert. Scroll-linked product reveals and pinned feature beats keep visitors moving toward the buy — every frame earns the next scroll.",
+    title: "Types of websites",
+    tag: "Strategy",
+    body: "Landing page, corporate site, online store, or full web app — each solves a different problem, and picking the wrong one wastes budget.",
     detail:
-      "Built in six weeks alongside the product team, the launch site pairs a horizontal feature reel with a sticky add-to-cart bar. Conversion lifted 34% over the static page it replaced.",
+      "A landing page sells one thing fast. A corporate site builds trust and answers questions. An online store handles catalog, cart and checkout. A web app (or SaaS) is a tool your users log into and use over and over. We start every project by working out which of these you actually need — before any design or code happens.",
   },
   {
     no: "02",
-    title: "Meridian",
-    tag: "Brand site",
-    body: "A brand world rebuilt for motion. Bold type, fluid transitions, and a homepage that grabs attention from the first frame and never lets the eye rest.",
+    title: "Frontend vs backend vs full-stack",
+    tag: "Architecture",
+    body: "Frontend is what users see and click. Backend is the logic, data and security behind it. Full-stack means one team owns both, end to end.",
     detail:
-      "The homepage swaps in three hero treatments depending on referrer, but every path lands on the same physics-driven type system — built once, reused across every campaign page since.",
+      "Frontend covers layout, interaction and everything rendered in the browser. Backend covers the server, database, business logic and authentication that the frontend talks to. Hiring separately for each often means slow handoffs and finger-pointing when something breaks. We build both ourselves, so the whole product is one team's responsibility.",
   },
   {
     no: "03",
-    title: "Halcyon",
-    tag: "Editorial",
-    body: "An editorial platform where reading feels alive. Typographic reveals and parallax imagery add depth without ever fighting the content itself.",
+    title: "Speed & SEO",
+    tag: "Performance",
+    body: "A slow site loses visitors before they see your content, and search engines notice the same thing — speed and findability are the same problem.",
     detail:
-      "Each article gets its own pacing: drop caps animate in, inline imagery parallaxes against the reading column, and a progress rail tracks how far there is left to go.",
+      "Every extra second of load time costs conversions, and Google factors page speed directly into search ranking. Technical performance — image sizing, code splitting, server response time, clean markup — isn't a nice-to-have polish step, it's the foundation that decides whether people ever reach your message at all.",
   },
   {
     no: "04",
-    title: "Vantage",
-    tag: "Case study",
-    body: "A data story told through scroll. Animated counters and staged reveals turn dense numbers into a narrative anyone can follow at a glance.",
+    title: "DevOps & deployment",
+    tag: "Operations",
+    body: "Writing the code is half the job — deploying it safely, monitoring it in production, and shipping updates is the other half.",
     detail:
-      "Three years of usage data compressed into a single scroll: counters tick up against scrubbed line charts, and every section ends on the number that mattered most to the client.",
+      "A finished codebase isn't a finished product. It needs a reliable deployment pipeline, monitoring to catch problems before users do, and a safe way to ship updates without downtime. We set this up as part of every build, so launch day isn't where the relationship ends.",
   },
 ];
 
 export const approach = [
   {
     no: "01",
-    title: "Strategy",
-    body: "We map the scroll story before a single pixel moves — what the visitor should feel at every beat, and exactly why it matters.",
+    title: "Discovery",
+    body: "We map the real problem before writing a line of code — what the product needs to do, and why it matters to your users.",
     tone: "ink",
   },
   {
     no: "02",
     title: "Design",
-    body: "Bold, brutal layouts with intent. Type that commands the page and structure that earns every single scroll.",
+    body: "Clear structure and intentional layouts. Interfaces that make sense at a glance and hold up under real use.",
     tone: "flame",
   },
   {
     no: "03",
-    title: "Motion",
-    body: "Every transition tuned by hand — scrubbed to scroll, eased for weight, never janky and never gratuitous.",
+    title: "Build",
+    body: "Clean, typed code — built to be maintained, not just demoed. Every piece reviewed against the original brief.",
     tone: "ink",
   },
   {
     no: "04",
-    title: "Ship",
-    body: "Performance-first and accessible by default. Reduced-motion aware, sixty frames a second, ready for real users.",
+    title: "Ship & support",
+    body: "Performance-first and accessible by default, deployed with monitoring in place — and we stay reachable after launch.",
     tone: "flame",
   },
 ];
 
-export const stats = [
-  { value: 120, suffix: "fps", label: "buttery target" },
-  { value: 40, suffix: "k+", label: "sites shipped" },
-  { value: 9, suffix: "ms", label: "median frame" },
-  { value: 100, suffix: "%", label: "scroll-native" },
-];
+export const statsIntro = {
+  kicker: "By the numbers",
+  heading: "Proof, not promises",
+  body: "A track record built across real client projects, not slideware.",
+};
 
-export const pricing = [
-  {
-    name: "Solo",
-    price: "$0",
-    period: "forever",
-    features: ["1 project", "Core scroll triggers", "Community support"],
-    cta: "Start free",
-    featured: false,
-  },
-  {
-    name: "Studio",
-    price: "$24",
-    period: "/ month",
-    features: [
-      "Unlimited projects",
-      "All plugins unlocked",
-      "Pin & SplitText",
-      "Priority support",
-    ],
-    cta: "Go Studio",
-    featured: true,
-  },
-  {
-    name: "Agency",
-    price: "Let's talk",
-    period: "",
-    features: ["Everything in Studio", "Team seats", "Onboarding", "SLA"],
-    cta: "Contact us",
-    featured: false,
-  },
+export const stats = [
+  { value: 6, suffix: "+", label: "years building software" },
+  { value: 40, suffix: "+", label: "projects shipped" },
+  { value: 99, suffix: "%", label: "on-time delivery" },
+  { value: 100, suffix: "%", label: "client satisfaction" },
 ];
 
 export const magicSection = {
   topLines: ["", ""],
   bottomLines: ["", ""],
-  phrase: "Ready to create *maaaaaaaaaagic?*",
+  phrase: "Ready to *build something real?*",
 };
 
 export const cta = {
-  title: "Make it move",
-  subtitle: "Start animating in minutes. No credit card, no ceremony.",
-  button: "Get MOTIVE",
+  eyebrow: "Ready?",
+  title: "Let's build it",
+  subtitle: "Tell us what you're building. No credit card, no ceremony — just a conversation.",
+  button: "Start a project",
 };
 
 export const footer = {
-  note: "Built as a GSAP scroll demo.",
-  links: ["Twitter", "GitHub", "Dribbble", "Email"],
+  note: "Available for freelance and contract work.",
+  links: ["Email", "GitHub", "LinkedIn", "Telegram"],
 };

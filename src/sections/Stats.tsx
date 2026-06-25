@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "../lib/gsap";
-import { stats } from "../content/site";
+import { stats, statsIntro } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScramble } from "../hooks/useScramble";
 import { EASE, SCROLL_START } from "../lib/motion";
@@ -8,7 +8,7 @@ import { EASE, SCROLL_START } from "../lib/motion";
 export default function Stats() {
   const root = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
-  const headingRef = useScramble<HTMLHeadingElement>("Proof in motion");
+  const headingRef = useScramble<HTMLHeadingElement>(statsIntro.heading);
 
   useGSAP(
     () => {
@@ -42,17 +42,17 @@ export default function Stats() {
           <div>
             <p className="flex items-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
               <span className="h-px w-8 bg-flame/60" />
-              By the numbers
+              {statsIntro.kicker}
             </p>
             <h2
               ref={headingRef}
               className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl"
             >
-              Proof in motion
+              {statsIntro.heading}
             </h2>
           </div>
           <p className="max-w-xs text-sm font-light text-ink/50 md:text-right">
-            Built and battle-tested across thousands of production builds.
+            {statsIntro.body}
           </p>
         </div>
 

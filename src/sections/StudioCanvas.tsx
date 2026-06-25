@@ -382,7 +382,7 @@ export default function StudioCanvas() {
               commitEdit,
             })}
             <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 text-xs tracking-[0.25em] text-paper/40 uppercase">
-              The motion pipeline behind every MOTIVE build.
+              {studio.footnote}
             </div>
           </>
         ) : (

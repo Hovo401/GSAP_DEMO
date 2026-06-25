@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { features } from "../content/site";
+import { features, featuresIntro } from "../content/site";
 import { useScramble } from "../hooks/useScramble";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { DURATION, STAGGER, SCROLL_START } from "../lib/motion";
@@ -7,7 +7,7 @@ import TiltCard, { TiltLayer } from "../components/ui/TiltCard";
 
 export default function Features() {
   const root = useRef<HTMLElement>(null);
-  const headingRef = useScramble<HTMLHeadingElement>("Built to move");
+  const headingRef = useScramble<HTMLHeadingElement>(featuresIntro.heading);
 
   useScrollReveal(root, ".feature-heading", {
     duration: DURATION.medium,
@@ -34,17 +34,17 @@ export default function Features() {
           <div>
             <p className="flex items-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
               <span className="h-px w-8 bg-flame/60" />
-              What it does
+              {featuresIntro.kicker}
             </p>
             <h2
               ref={headingRef}
               className="font-display mt-3 text-6xl leading-none uppercase md:text-8xl"
             >
-              Built to move
+              {featuresIntro.heading}
             </h2>
           </div>
           <p className="max-w-xs text-sm font-light text-paper/50 md:text-right">
-            Four primitives that turn scroll position into choreography.
+            {featuresIntro.body}
           </p>
         </div>
 
