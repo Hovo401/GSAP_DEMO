@@ -3,6 +3,7 @@ import { features } from "../content/site";
 import { useScramble } from "../hooks/useScramble";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { DURATION, STAGGER, SCROLL_START } from "../lib/motion";
+import TiltCard from "../components/ui/TiltCard";
 
 export default function Features() {
   const root = useRef<HTMLElement>(null);
@@ -49,29 +50,30 @@ export default function Features() {
 
         <div className="feature-grid grid gap-6 md:grid-cols-2">
           {features.map((f) => (
-            <article
+            <TiltCard
               key={f.no}
-              className="feature-card group relative overflow-hidden border-2 border-paper/20 bg-ink p-8 transition-colors duration-300 hover:border-flame md:p-10"
+              wrapperClassName="feature-card"
+              className="group relative h-full overflow-hidden border-2 border-paper/20 bg-ink p-8 transition-colors duration-300 hover:border-flame md:p-10"
             >
-              <span className="font-display pointer-events-none absolute -top-6 -right-2 text-[8rem] leading-none text-paper/[0.04] transition-colors duration-300 select-none group-hover:text-flame/10 md:text-[10rem]">
+              <span className="font-display pointer-events-none absolute -top-6 -right-2 text-[8rem] leading-none text-paper/[0.04] transition-colors duration-300 transform-[translateZ(-60px)] select-none group-hover:text-flame/10 md:text-[10rem]">
                 {f.no}
               </span>
 
-              <div className="relative flex items-center justify-between">
+              <div className="relative flex items-center justify-between transform-[translateZ(50px)]">
                 <span className="font-display text-3xl text-flame">{f.no}</span>
                 <span className="text-2xl text-paper/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-flame">
                   ↗
                 </span>
               </div>
-              <h3 className="relative mt-6 text-2xl font-bold tracking-tight md:text-3xl">
+              <h3 className="relative mt-6 text-2xl font-bold tracking-tight transform-[translateZ(85px)] md:text-3xl">
                 {f.title}
               </h3>
-              <p className="relative mt-4 text-base font-light text-paper/60 md:text-lg">
+              <p className="relative mt-4 text-base font-light text-paper/60 transform-[translateZ(45px)] md:text-lg">
                 {f.body}
               </p>
 
               <span className="absolute bottom-0 left-0 h-[3px] w-0 bg-flame transition-all duration-300 ease-out group-hover:w-full" />
-            </article>
+            </TiltCard>
           ))}
         </div>
       </div>
