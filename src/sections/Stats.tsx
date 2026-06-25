@@ -1,14 +1,22 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, useGSAP } from "../lib/gsap";
-import { stats, statsIntro } from "../content/site";
+import { stats as statValues } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScramble } from "../hooks/useScramble";
 import { EASE, SCROLL_START } from "../lib/motion";
 
+type StatLabel = { label: string };
+
 export default function Stats() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
-  const headingRef = useScramble<HTMLHeadingElement>(statsIntro.heading);
+  const heading = t("statsIntro.heading");
+  const headingRef = useScramble<HTMLHeadingElement>(heading);
+  const stats = (t("stats.items", { returnObjects: true }) as StatLabel[]).map(
+    (item, i) => ({ ...statValues[i], ...item }),
+  );
 
   useGSAP(
     () => {
@@ -42,17 +50,17 @@ export default function Stats() {
           <div>
             <p className="flex items-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
               <span className="h-px w-8 bg-flame/60" />
-              {statsIntro.kicker}
+              {t("statsIntro.kicker")}
             </p>
             <h2
               ref={headingRef}
               className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl"
             >
-              {statsIntro.heading}
+              {heading}
             </h2>
           </div>
           <p className="max-w-xs text-sm font-light text-ink/50 md:text-right">
-            {statsIntro.body}
+            {t("statsIntro.body")}
           </p>
         </div>
 

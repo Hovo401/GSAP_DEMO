@@ -1,9 +1,11 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, ScrollTrigger, SplitText, useGSAP } from "../lib/gsap";
-import { magicSection as copy } from "../content/site";
+import { magicSection } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export default function MagicReveal() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLHeadingElement>(null);
   const reduced = useReducedMotion();
@@ -95,13 +97,13 @@ export default function MagicReveal() {
       className="relative flex min-h-screen items-center overflow-hidden bg-ink text-white"
     >
       <div className="pointer-events-none absolute inset-x-0 top-20 z-10 px-6 text-center text-sm leading-relaxed text-white/85 md:text-base">
-        {copy.topLines.map((line) => (
-          <p key={line}>{line}</p>
+        {magicSection.topLines.map((line, i) => (
+          <p key={i}>{line}</p>
         ))}
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-20 z-10 px-6 text-center text-sm leading-relaxed text-white/85 md:text-base">
-        {copy.bottomLines.map((line) => (
-          <p key={line}>{line}</p>
+        {magicSection.bottomLines.map((line, i) => (
+          <p key={i}>{line}</p>
         ))}
       </div>
 
@@ -113,7 +115,7 @@ export default function MagicReveal() {
             : "w-max whitespace-nowrap text-[12vw] will-change-transform"
         }`}
       >
-        {copy.phrase}
+        {t("magicSection.phrase")}
       </h2>
     </section>
   );

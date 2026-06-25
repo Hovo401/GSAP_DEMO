@@ -46,7 +46,9 @@ export default function Home() {
       const next = (i: number) => {
         if (cancelled) return;
         if (i >= loaders.length) {
-          requestAnimationFrame(() => globalThis.dispatchEvent(new Event("app:sections-ready")));
+          requestAnimationFrame(() =>
+            globalThis.dispatchEvent(new Event("app:sections-ready")),
+          );
           return;
         }
         idle(() => {
@@ -84,7 +86,8 @@ export default function Home() {
       maybeRefresh();
     });
 
-    return () => globalThis.removeEventListener("app:preload-done", onPreloadDone);
+    return () =>
+      globalThis.removeEventListener("app:preload-done", onPreloadDone);
   }, []);
 
   return (
@@ -100,8 +103,8 @@ export default function Home() {
         <StudioCanvas />
         <Approach />
         <Stats />
-        <CTA />
         <MagicReveal />
+        <CTA />
         <Footer />
       </Suspense>
     </div>

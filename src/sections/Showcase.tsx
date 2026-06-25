@@ -1,17 +1,24 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, useGSAP } from "../lib/gsap";
-import { showcase, showcaseIntro, showcaseOutro } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScramble } from "../hooks/useScramble";
 import { CaseOverlay } from "./showcase/CaseOverlay";
 import { useShowcaseBlob } from "./showcase/useShowcaseBlob";
 import type { Project } from "./showcase/types";
 
+type ShowcaseItem = { title: string; tag: string; body: string; detail: string };
+
 export default function Showcase() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const introHeadingRef = useScramble<HTMLHeadingElement>(showcaseIntro.title);
+  const introTitle = t("showcaseIntro.title");
+  const introHeadingRef = useScramble<HTMLHeadingElement>(introTitle);
+  const showcase: Project[] = (
+    t("showcase.items", { returnObjects: true }) as ShowcaseItem[]
+  ).map((item, i) => ({ no: String(i + 1).padStart(2, "0"), ...item }));
 
   const cardRefs = useRef<Record<string, HTMLElement | null>>({});
   const carrierRef = useRef<HTMLDivElement>(null);
@@ -143,23 +150,23 @@ export default function Showcase() {
           </defs>
         </svg>
 
-        <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
+        <div className="flex h-full w-screen shrink-0 flex-col justify-center overflow-hidden px-8 md:w-[55vw] md:px-24">
           <p className="text-sm font-medium tracking-[0.4em] text-flame uppercase">
-            {showcaseIntro.kicker}
+            {t("showcaseIntro.kicker")}
           </p>
           <h2
             ref={introHeadingRef}
             data-blob-start
             className="font-display mt-4 text-[18vw] leading-[0.85] uppercase md:text-[9vw]"
           >
-            {showcaseIntro.title}
+            {introTitle}
           </h2>
           <p className="mt-8 max-w-md text-lg font-light text-paper/60">
-            {showcaseIntro.body}
+            {t("showcaseIntro.body")}
           </p>
           <p className="mt-10 flex items-center gap-3 text-xs font-medium tracking-[0.3em] text-paper/40 uppercase">
             <span className="h-px w-10 bg-paper/40" />
-            {showcaseIntro.scrollHint}
+            {t("showcaseIntro.scrollHint")}
           </p>
         </div>
 
@@ -176,7 +183,7 @@ export default function Showcase() {
                 cardRefs.current[item.no] = el;
               }}
               onClick={() => setActive(item)}
-              aria-label={`Open ${item.title} case study`}
+              aria-label={t("showcaseCard.openAria", { title: item.title })}
               className="relative mb-[6vh] flex w-full flex-1 cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
             >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -208,15 +215,15 @@ export default function Showcase() {
             data-blob-end
             className="font-display text-[14vw] leading-[0.85] uppercase md:text-[7vw]"
           >
-            {showcaseOutro.headingLines[0]}
+            {t("showcaseOutro.headingLine1")}
             <br />
-            {showcaseOutro.headingLines[1]}
+            {t("showcaseOutro.headingLine2")}
           </h2>
           <a
             href="#cta"
             className="mt-10 inline-flex w-fit items-center gap-3 border-2 border-paper px-8 py-4 text-sm font-bold tracking-widest text-paper uppercase transition-colors duration-200 hover:bg-paper hover:text-ink"
           >
-            {showcaseOutro.cta}
+            {t("showcaseOutro.cta")}
           </a>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
+import { useTranslation } from "react-i18next";
 import type { Draggable } from "gsap/Draggable";
 import { studio } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
@@ -18,6 +19,7 @@ import type { Note, Page, Pt } from "./studio/types";
 const seedPageIds = new Set(studio.pages.map((p) => p.id));
 
 export default function StudioCanvas() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -304,17 +306,17 @@ export default function StudioCanvas() {
         <div>
           <p className="flex items-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
             <span className="h-px w-8 bg-flame/60" />
-            {studio.kicker}
+            {t("studio.kicker")}
           </p>
           <h2
             data-skew
             className="font-display mt-3 text-5xl leading-none uppercase md:text-7xl"
           >
-            {studio.title}
+            {t("studio.title")}
           </h2>
         </div>
         <p className="max-w-xs text-sm font-light text-paper/50 md:text-right">
-          {studio.hint}
+          {t("studio.hint")}
         </p>
       </div>
 

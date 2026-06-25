@@ -1,10 +1,11 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, SplitText, useGSAP } from "../lib/gsap";
-import { manifesto } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { EASE } from "../lib/motion";
 
 export default function TextReveal() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const reduced = useReducedMotion();
@@ -48,7 +49,7 @@ export default function TextReveal() {
         ref={textRef}
         className="max-w-5xl text-3xl leading-[1.15] font-bold tracking-tight md:text-6xl"
       >
-        {manifesto}
+        {t("manifesto")}
       </p>
     </section>
   );

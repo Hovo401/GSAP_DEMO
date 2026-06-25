@@ -1,13 +1,20 @@
 import { useRef } from "react";
-import { features, featuresIntro } from "../content/site";
+import { useTranslation } from "react-i18next";
 import { useScramble } from "../hooks/useScramble";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { DURATION, STAGGER, SCROLL_START } from "../lib/motion";
 import TiltCard, { TiltLayer } from "../components/ui/TiltCard";
 
+type FeatureItem = { title: string; body: string };
+
 export default function Features() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
-  const headingRef = useScramble<HTMLHeadingElement>(featuresIntro.heading);
+  const heading = t("featuresIntro.heading");
+  const headingRef = useScramble<HTMLHeadingElement>(heading);
+  const features = (
+    t("features.items", { returnObjects: true }) as FeatureItem[]
+  ).map((item, i) => ({ no: String(i + 1).padStart(2, "0"), ...item }));
 
   useScrollReveal(root, ".feature-heading", {
     duration: DURATION.medium,
@@ -34,17 +41,17 @@ export default function Features() {
           <div>
             <p className="flex items-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
               <span className="h-px w-8 bg-flame/60" />
-              {featuresIntro.kicker}
+              {t("featuresIntro.kicker")}
             </p>
             <h2
               ref={headingRef}
               className="font-display mt-3 text-6xl leading-none uppercase md:text-8xl"
             >
-              {featuresIntro.heading}
+              {heading}
             </h2>
           </div>
           <p className="max-w-xs text-sm font-light text-paper/50 md:text-right">
-            {featuresIntro.body}
+            {t("featuresIntro.body")}
           </p>
         </div>
 

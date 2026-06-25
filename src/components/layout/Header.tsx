@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { nav as navItems } from "../../content/site";
 import ContactPanel from "../ui/ContactPanel";
 
@@ -21,7 +22,10 @@ const HOME_PILL: Pill = {
   opacity: 1,
 };
 
+const LANGUAGES = ["en", "ru"] as const;
+
 export default function Header() {
+  const { t, i18n } = useTranslation();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [pill, setPill] = useState<Pill>({ ...HOME_PILL, opacity: 0 });
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -143,6 +147,12 @@ export default function Header() {
     return "text-ink/75 hover:text-ink";
   };
 
+  const currentLang = i18n.language.split("-")[0];
+  const setLang = (lng: string) => {
+    if (lng === currentLang) return;
+    i18n.changeLanguage(lng).then(() => window.location.reload());
+  };
+
   return (
     <>
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-start justify-center px-6 pt-5">
@@ -177,9 +187,10 @@ export default function Header() {
             {navItems.map((item, i) => {
               const active = activeIndex === i;
               const isContact = item.panel === "contact";
+              const label = t(`nav.${item.key}`);
               return (
                 <button
-                  key={item.label}
+                  key={item.key}
                   ref={(el) => {
                     itemRefs.current[i] = el;
                   }}
@@ -197,10 +208,10 @@ export default function Header() {
                       <span
                         className={`block h-6 leading-6 ${active ? "text-white" : ""}`}
                       >
-                        {item.label}
+                        {label}
                       </span>
                       <span className="block h-6 leading-6 text-flame">
-                        {item.label}
+                        {label}
                       </span>
                     </span>
                   </span>
@@ -216,7 +227,7 @@ export default function Header() {
             className="nav-glass flex cursor-pointer items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5"
           >
             <span className="h-2 w-2 rounded-full bg-flame" />
-            Menu
+            {t("header.menu")}
           </button>
         </div>
       </header>
@@ -235,20 +246,20 @@ export default function Header() {
             <div className="flex items-center justify-between px-5 pt-5 pb-3">
               <span className="flex items-center gap-2 text-sm font-semibold text-ink">
                 <span className="h-2.5 w-2.5 rounded-full bg-flame" />
-                Menu
+                {t("header.menu")}
               </span>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="cursor-pointer text-sm font-medium text-ink/50 hover:text-ink"
               >
-                Close
+                {t("header.close")}
               </button>
             </div>
             <div className="mx-5 h-px bg-black/5" />
             <nav className="flex flex-col px-3 py-3">
               {navItems.map((item, i) => (
                 <button
-                  key={item.label}
+                  key={item.key}
                   onClick={() =>
                     item.panel === "contact" ? openContact() : goTo(item.href!, i)
                   }
@@ -258,10 +269,28 @@ export default function Header() {
                       : "text-ink/80 hover:bg-black/5"
                   }`}
                 >
-                  {item.label}
+                  {t(`nav.${item.key}`)}
                 </button>
               ))}
             </nav>
+            <div className="mx-5 h-px bg-black/5" />
+            <div className="flex items-center gap-1 px-3 py-3">
+              {LANGUAGES.map((lng) => (
+                <button
+                  key={lng}
+                  type="button"
+                  onClick={() => setLang(lng)}
+                  aria-pressed={currentLang === lng}
+                  className={`flex-1 cursor-pointer rounded-2xl px-4 py-2 text-center text-sm font-medium uppercase transition-colors ${
+                    currentLang === lng
+                      ? "bg-flame text-white"
+                      : "text-ink/70 hover:bg-black/5"
+                  }`}
+                >
+                  {lng}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

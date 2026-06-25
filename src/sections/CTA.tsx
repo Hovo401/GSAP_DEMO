@@ -1,10 +1,11 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, SplitText, useGSAP } from "../lib/gsap";
-import { cta } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { DURATION, EASE, STAGGER } from "../lib/motion";
 
 export default function CTA() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const reduced = useReducedMotion();
@@ -13,7 +14,7 @@ export default function CTA() {
     () => {
       if (reduced || !titleRef.current) return;
 
-      const split = new SplitText(titleRef.current, { type: "chars" });
+      const split = new SplitText(titleRef.current, { type: "words, chars" });
 
       const tl = gsap.timeline({
         scrollTrigger: { trigger: root.current, start: "top 70%" },
@@ -56,19 +57,19 @@ export default function CTA() {
       <div className="cta-plate absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-ink/20" />
 
       <p className="cta-fade relative text-sm font-medium tracking-[0.4em] uppercase">
-        {cta.eyebrow}
+        {t("cta.eyebrow")}
       </p>
       <h2
         ref={titleRef}
         className="font-display relative mt-4 text-center text-[22vw] leading-[0.85] uppercase md:text-[16vw]"
       >
-        {cta.title}
+        {t("cta.title")}
       </h2>
       <p className="cta-fade relative mt-6 max-w-md text-center text-lg font-light text-ink/70">
-        {cta.subtitle}
+        {t("cta.subtitle")}
       </p>
       <button className="cta-fade relative mt-10 cursor-pointer border-2 border-ink bg-ink px-10 py-4 text-sm font-bold tracking-widest text-paper uppercase transition-colors duration-200 hover:bg-transparent hover:text-ink">
-        {cta.button}
+        {t("cta.button")}
       </button>
     </section>
   );
