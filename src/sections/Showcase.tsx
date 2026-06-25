@@ -181,22 +181,22 @@ export default function Showcase() {
             >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-              <span className="font-display pointer-events-none absolute -bottom-8 -left-2 text-[12rem] leading-none text-paper/[0.03] select-none">
+              <span className="font-display pointer-events-none absolute -bottom-8 -left-2 text-[clamp(8rem,16vw,18rem)] leading-none text-paper/[0.03] select-none">
                 {item.no}
               </span>
 
               <div className="card-reveal relative flex items-center justify-between">
-                <span className="text-base text-paper/40">({item.no})</span>
-                <span className="inline-block rounded-full border border-paper/15 px-3 py-1 text-[0.65rem] font-medium tracking-[0.25em] text-paper/45 uppercase">
+                <span className="text-[clamp(1rem,1.1vw,1.25rem)] text-paper/40">({item.no})</span>
+                <span className="inline-block rounded-full border border-paper/15 px-3 py-1 text-[clamp(0.65rem,0.9vw,0.85rem)] font-medium tracking-[0.25em] text-paper/45 uppercase">
                   {item.tag}
                 </span>
               </div>
 
-              <h3 className="card-reveal font-display relative mt-6 text-5xl leading-[0.95] text-flame uppercase md:text-6xl">
+              <h3 className="card-reveal font-display relative mt-6 text-[clamp(2.5rem,5.5vw,6rem)] leading-[0.95] text-flame uppercase">
                 {item.title}
               </h3>
 
-              <p className="card-reveal relative mt-6 max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
+              <p className="card-reveal relative mt-6 max-w-sm text-[clamp(1rem,1.3vw,1.375rem)] leading-relaxed text-paper/55">
                 {item.body}
               </p>
             </button>
