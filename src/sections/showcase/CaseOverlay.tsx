@@ -1,8 +1,22 @@
-import { useRef, useLayoutEffect } from "react";
+import { useRef } from "react";
 import { createPortal } from "react-dom";
-import { gsap } from "../../lib/gsap";
-import { cardScale } from "./utils";
+import { Flip, gsap, useGSAP } from "../../lib/gsap";
+import { DURATION, EASE, STAGGER } from "../../lib/motion";
 import type { Project } from "./types";
+
+const FLIP_EASE = "power3.inOut";
+
+function isOnscreen(el: HTMLElement) {
+  const r = el.getBoundingClientRect();
+  return (
+    r.width > 0 &&
+    r.height > 0 &&
+    r.bottom > 0 &&
+    r.right > 0 &&
+    r.top < globalThis.innerHeight &&
+    r.left < globalThis.innerWidth
+  );
+}
 
 export function CaseOverlay({
   item,
@@ -15,206 +29,155 @@ export function CaseOverlay({
   reduced: boolean;
   onClose: () => void;
 }) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLButtonElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
 
-  const close = () => {
-    const panel = panelRef.current;
-    const inner = innerRef.current;
+  const fadeOutClose = () => {
     const backdrop = backdropRef.current;
-    if (
-      reduced ||
-      !panel ||
-      !inner ||
-      !backdrop ||
-      !sourceEl ||
-      closingRef.current
-    ) {
+    const panel = panelRef.current;
+    if (reduced || !backdrop || !panel) {
       onClose();
       return;
     }
-    closingRef.current = true;
-    const to = cardScale(sourceEl);
     gsap
       .timeline({ onComplete: onClose })
-      .to(inner, { autoAlpha: 0, duration: 0.2, ease: "power2.in" }, 0)
-      .to(
-        panel,
-        {
-          x: to.x,
-          y: to.y,
-          scaleX: to.scaleX,
-          scaleY: to.scaleY,
-          borderRadius: 24,
-          duration: 0.5,
-          ease: "power3.inOut",
-        },
-        0.08,
-      )
-      .to(backdrop, { opacity: 0, duration: 0.45, ease: "power2.in" }, 0.12);
+      .to(panel, { autoAlpha: 0, y: 24, scale: 0.97, duration: DURATION.fast, ease: EASE.in })
+      .to(backdrop, { opacity: 0, duration: DURATION.fast }, 0);
   };
 
-  // Point the Escape handler at the latest close without re-running the effect.
+  const close = () => {
+    const backdrop = backdropRef.current;
+    const panel = panelRef.current;
+    if (closingRef.current) return;
+    closingRef.current = true;
+
+    if (reduced || !backdrop || !panel || !sourceEl || !isOnscreen(sourceEl)) {
+      fadeOutClose();
+      return;
+    }
+
+    gsap.to(panel.querySelectorAll(".case-stagger"), {
+      opacity: 0,
+      y: 12,
+      duration: DURATION.fast / 2,
+      ease: EASE.in,
+    });
+    gsap.to(backdrop, { opacity: 0, duration: DURATION.base, ease: EASE.in });
+
+    const state = Flip.getState(panel, { props: "borderRadius" });
+    Flip.fit(panel, sourceEl, { scale: true, props: "borderRadius" });
+    Flip.from(state, {
+      duration: DURATION.base,
+      ease: FLIP_EASE,
+      scale: true,
+      props: "borderRadius",
+      onComplete: () => {
+        gsap.set(sourceEl, { autoAlpha: 1 });
+        onClose();
+      },
+    });
+  };
+
   const closeRef = useRef(close);
   closeRef.current = close;
 
-  useLayoutEffect(() => {
-    const panel = panelRef.current;
-    const inner = innerRef.current;
-    const backdrop = backdropRef.current;
-    if (!panel || !inner || !backdrop) return;
+  useGSAP(
+    () => {
+      const backdrop = backdropRef.current;
+      const panel = panelRef.current;
+      if (!backdrop || !panel) return;
 
-    // Freeze background scroll so the morph target stays put.
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
 
-    // Escape closes the case — standard modal affordance.
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeRef.current();
-    };
-    globalThis.addEventListener("keydown", onKey);
-
-    let tl: gsap.core.Timeline | undefined;
-
-    if (reduced || !sourceEl) {
-      gsap.set(backdrop, { opacity: 1 });
-      gsap.set(inner, { autoAlpha: 1 });
-    } else {
-      const from = cardScale(sourceEl);
-      // Panel grows from the card as a solid block; content is hidden until it
-      // reaches full size, so nothing ever overflows mid-morph.
-      gsap.set(panel, {
-        transformOrigin: "top left",
-        x: from.x,
-        y: from.y,
-        scaleX: from.scaleX,
-        scaleY: from.scaleY,
-        borderRadius: 24,
-      });
-      gsap.set(inner, { autoAlpha: 0 });
-      gsap.set(backdrop, { opacity: 0 });
-
-      const reveal = inner.querySelectorAll(".case-stagger");
-      tl = gsap.timeline();
-      tl.to(backdrop, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0)
-        .to(
-          panel,
-          {
-            x: 0,
-            y: 0,
-            scaleX: 1,
-            scaleY: 1,
-            borderRadius: 0,
-            duration: 0.6,
-            ease: "power3.inOut",
-          },
-          0,
-        )
-        .to(inner, { autoAlpha: 1, duration: 0.3, ease: "power2.out" }, 0.42)
-        .from(
-          reveal,
-          {
-            y: 30,
-            opacity: 0,
-            stagger: 0.07,
-            duration: 0.55,
-            ease: "power3.out",
-          },
-          0.46,
-        );
-    }
-
-    let onPointerMove: ((e: PointerEvent) => void) | undefined;
-    if (!reduced && glowRef.current) {
-      gsap.set(glowRef.current, { xPercent: -50, yPercent: -50 });
-      const glowX = gsap.quickTo(glowRef.current, "x", {
-        duration: 0.4,
-        ease: "power3",
-      });
-      const glowY = gsap.quickTo(glowRef.current, "y", {
-        duration: 0.4,
-        ease: "power3",
-      });
-      onPointerMove = (e: PointerEvent) => {
-        glowX(e.clientX - window.innerWidth / 2);
-        glowY(e.clientY - window.innerHeight / 2);
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") closeRef.current();
       };
-      window.addEventListener("pointermove", onPointerMove);
-    }
+      globalThis.addEventListener("keydown", onKey);
 
-    return () => {
-      globalThis.removeEventListener("keydown", onKey);
-      if (onPointerMove) window.removeEventListener("pointermove", onPointerMove);
-      document.body.style.overflow = prevOverflow;
-      tl?.kill();
-    };
-  }, [reduced, sourceEl]);
+      const reveal = panel.querySelectorAll(".case-stagger");
 
-  const dark = Number(item.no) % 2 === 0;
+      if (reduced || !sourceEl || !isOnscreen(sourceEl)) {
+        gsap.set(backdrop, { opacity: 1 });
+        gsap.set(reveal, { opacity: 1, y: 0 });
+      } else {
+        gsap.set(reveal, { opacity: 0, y: 20 });
+
+        Flip.fit(panel, sourceEl, { scale: true, props: "borderRadius" });
+        const state = Flip.getState(panel, { props: "borderRadius" });
+        gsap.set(panel, { clearProps: "all" });
+        gsap.set(sourceEl, { autoAlpha: 0 });
+
+        gsap.to(backdrop, { opacity: 1, duration: DURATION.base, ease: EASE.softOut });
+        Flip.from(state, {
+          duration: DURATION.slow,
+          ease: FLIP_EASE,
+          scale: true,
+          props: "borderRadius",
+        });
+        gsap.to(reveal, {
+          opacity: 1,
+          y: 0,
+          stagger: STAGGER.tight,
+          duration: DURATION.fast,
+          ease: EASE.out,
+          delay: DURATION.slow * 0.55,
+        });
+      }
+
+      return () => {
+        globalThis.removeEventListener("keydown", onKey);
+        document.body.style.overflow = prevOverflow;
+        if (sourceEl) gsap.set(sourceEl, { autoAlpha: 1 });
+      };
+    },
+    { scope: rootRef, dependencies: [reduced, sourceEl] },
+  );
 
   return createPortal(
-    <div className="fixed inset-0 z-[90]">
+    <div ref={rootRef} className="fixed inset-0 z-90">
       <button
         type="button"
         ref={backdropRef}
         aria-label="Close case study"
         onClick={close}
-        className="absolute inset-0 cursor-pointer bg-ink/70 backdrop-blur-sm"
+        className="absolute inset-0 cursor-pointer bg-ink/80 backdrop-blur-md"
       />
+
       <div
         ref={panelRef}
-        className={`absolute inset-0 overflow-hidden ${
-          dark ? "bg-ink text-paper" : "bg-flame text-paper"
-        }`}
+        className="absolute inset-0 overflow-y-auto bg-[#161616] p-8 text-paper md:p-14"
       >
-        <div
-          ref={innerRef}
-          className="relative flex h-full flex-col justify-between p-8 md:p-16"
-        >
-          <div
-            ref={glowRef}
-            className="pointer-events-none absolute top-1/2 left-1/2 h-[50vw] w-[50vw] rounded-full will-change-transform"
-            style={{
-              background:
-                "radial-gradient(circle, color-mix(in srgb, var(--color-flame) 35%, transparent) 0%, transparent 60%)",
-              mixBlendMode: "screen",
-            }}
-          />
+        <span className="font-display pointer-events-none absolute -bottom-16 -left-4 text-[40vw] leading-none text-flame/6 select-none md:text-[26vw]">
+          {item.no}
+        </span>
 
-          <span className="font-display pointer-events-none absolute -bottom-16 -left-4 text-[40vw] leading-none opacity-[0.06] select-none md:text-[26vw]">
-            {item.no}
+        <div className="case-stagger relative flex items-start justify-between gap-4">
+          <span className="inline-block rounded-full border border-paper/20 px-4 py-1.5 text-xs font-medium tracking-[0.25em] text-paper/70 uppercase">
+            {item.tag}
           </span>
-
-          <div className="case-stagger relative flex items-start justify-between">
-            <span className="inline-block rounded-full border border-current/25 px-4 py-1.5 text-xs font-medium tracking-[0.25em] uppercase opacity-80">
-              {item.tag}
-            </span>
-            <button
-              type="button"
-              data-magnetic
-              onClick={close}
-              className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-current/30 text-xl transition-colors hover:bg-current/10"
-              aria-label="Close case study"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="relative max-w-4xl">
-            <p className="case-stagger text-base font-medium opacity-60">
-              ({item.no})
-            </p>
-            <h3 className="case-stagger font-display mt-2 text-[18vw] leading-[0.85] uppercase md:text-[10vw]">
-              {item.title}
-            </h3>
-            <p className="case-stagger mt-8 max-w-2xl text-lg leading-relaxed opacity-80 md:text-2xl">
-              {item.body}
-            </p>
-          </div>
+          <button
+            type="button"
+            data-magnetic
+            onClick={close}
+            aria-label="Close case study"
+            className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-paper/20 text-lg transition-colors hover:bg-paper/10"
+          >
+            ✕
+          </button>
         </div>
+
+        <p className="case-stagger relative mt-12 text-sm font-medium text-paper/40 md:mt-20">
+          ({item.no})
+        </p>
+        <h3 className="case-stagger font-display relative mt-2 text-[clamp(2.5rem,9vw,8rem)] leading-[0.9] text-flame uppercase">
+          {item.title}
+        </h3>
+        <p className="case-stagger relative mt-8 max-w-xl text-lg leading-relaxed text-paper/65 md:text-xl">
+          {item.body}
+        </p>
       </div>
     </div>,
     document.body,
