@@ -398,14 +398,8 @@ export const pricing = [
 ];
 
 export const magicSection = {
-  topLines: [
-    "How was your visit",
-    "Don't forget to reach out to let me know what you think",
-  ],
-  bottomLines: [
-    "And if you want to create magic",
-    "Get in touch and we'll see how we can help",
-  ],
+  topLines: ["", ""],
+  bottomLines: ["", ""],
   phrase: "Ready to create *maaaaaaaaaagic?*",
 };
 

@@ -14,14 +14,21 @@ export default function Showcase() {
   const introHeadingRef = useScramble<HTMLHeadingElement>(showcaseIntro.title);
 
   const cardRefs = useRef<Record<string, HTMLElement | null>>({});
-  const leadBlobRef = useRef<HTMLDivElement>(null);
-  const satelliteRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const carrierRef = useRef<HTMLDivElement>(null);
+  const leadFillRef = useRef<HTMLDivElement>(null);
+  const dropletRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sparkRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState<Project | null>(null);
 
   useShowcaseBlob(
     root,
     trackRef,
-    { lead: leadBlobRef, satellites: satelliteRefs },
+    {
+      carrier: carrierRef,
+      leadFill: leadFillRef,
+      droplets: dropletRefs,
+      sparks: sparkRefs,
+    },
     reduced,
   );
 
@@ -82,23 +89,55 @@ export default function Showcase() {
         className="relative flex h-screen w-max items-center will-change-transform"
       >
         <div
-          ref={leadBlobRef}
+          ref={carrierRef}
           aria-hidden
-          className="showcase-blob pointer-events-none absolute top-0 left-0 z-10 h-12 w-12 md:h-24 md:w-24"
+          className="showcase-goo pointer-events-none absolute top-0 left-0 z-10 h-[clamp(3rem,6vw,6rem)] w-[clamp(3rem,6vw,6rem)]"
         >
-          <div className="showcase-blob-aura" />
-          <div className="showcase-blob-shape h-full w-full" />
+          <div ref={leadFillRef} className="showcase-blob-shape" />
+          {[0].map((i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                dropletRefs.current[i] = el;
+              }}
+              className="showcase-blob-sat"
+            />
+          ))}
         </div>
-        {[0, 1].map((i) => (
+        {[0, 1, 2].map((i) => (
           <div
             key={i}
             ref={(el) => {
-              satelliteRefs.current[i] = el;
+              sparkRefs.current[i] = el;
             }}
             aria-hidden
-            className="showcase-blob showcase-blob-sat pointer-events-none absolute top-0 left-0 z-10"
+            className="showcase-spark pointer-events-none absolute top-0 left-0 z-10"
           />
         ))}
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute h-0 w-0"
+          focusable="false"
+        >
+          <defs>
+            <filter
+              id="showcase-goo"
+              x="-50%"
+              y="-50%"
+              width="200%"
+              height="200%"
+              colorInterpolationFilters="sRGB"
+            >
+              <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+              <feColorMatrix
+                in="blur"
+                mode="matrix"
+                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                result="goo"
+              />
+            </filter>
+          </defs>
+        </svg>
 
         <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
           <p className="text-sm font-medium tracking-[0.4em] text-flame uppercase">
