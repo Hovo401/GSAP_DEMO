@@ -1,10 +1,11 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, ScrollTrigger, useGSAP } from "../lib/gsap";
-import { marqueeWords } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { EASE } from "../lib/motion";
 
 export default function Marquee() {
+  const { t } = useTranslation();
   const root = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -40,6 +41,7 @@ export default function Marquee() {
     { scope: root, dependencies: [reduced] },
   );
 
+  const marqueeWords = t("marqueeWords", { returnObjects: true }) as string[];
   const words = [...marqueeWords, ...marqueeWords];
 
   return (

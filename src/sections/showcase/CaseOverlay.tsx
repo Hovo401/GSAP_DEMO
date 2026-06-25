@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { Flip, gsap, useGSAP } from "../../lib/gsap";
 import { DURATION, EASE, STAGGER } from "../../lib/motion";
 import type { Project } from "./types";
@@ -31,6 +32,7 @@ export function CaseOverlay({
   reduced: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -161,7 +163,7 @@ export function CaseOverlay({
       <button
         type="button"
         ref={backdropRef}
-        aria-label="Close case study"
+        aria-label={t("caseOverlay.closeAria")}
         onClick={close}
         className="absolute inset-0 cursor-pointer bg-ink/80 backdrop-blur-md"
       />
@@ -182,7 +184,7 @@ export function CaseOverlay({
             type="button"
             data-magnetic
             onClick={close}
-            aria-label="Close case study"
+            aria-label={t("caseOverlay.closeAria")}
             className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-paper/20 text-lg transition-colors hover:bg-paper/10"
           >
             ✕

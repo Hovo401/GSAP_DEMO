@@ -1,3 +1,7 @@
-import type { showcase } from "../../content/site";
-
-export type Project = (typeof showcase)[number];
+export type Project = {
+  no: string;
+  title: string;
+  tag: string;
+  body: string;
+  detail: string;
+};

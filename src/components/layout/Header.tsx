@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { nav as navItems } from "../../content/site";
+import { useTranslation } from "react-i18next";
+import { nav as navItems, type NavItem } from "../../content/site";
 import ContactPanel from "../ui/ContactPanel";
+import { useContactPanelStore } from "../../store/useContactPanelStore";
 
 const HOME_LEFT = -46;
 const DOT_SIZE = 34;
@@ -21,17 +23,23 @@ const HOME_PILL: Pill = {
   opacity: 1,
 };
 
+const LANGUAGES = ["en", "ru"] as const;
+
 export default function Header() {
+  const { t, i18n } = useTranslation();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [pill, setPill] = useState<Pill>({ ...HOME_PILL, opacity: 0 });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
+  const { open: contactOpen, openContact: openContactStore, closeContact } =
+    useContactPanelStore();
 
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const navLockRef = useRef(false);
-  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const remeasureRef = useRef<() => void>(() => {});
 
   const armNavLock = useCallback(() => {
@@ -71,7 +79,10 @@ export default function Header() {
     let tops: number[] = [];
     const measure = () => {
       targets = navItems
-        .map((item, i) => ({ i, el: item.href ? document.querySelector(item.href) : null }))
+        .map((item, i) => ({
+          i,
+          el: item.href ? document.querySelector(item.href) : null,
+        }))
         .filter((t): t is { i: number; el: Element } => t.el !== null);
       const scrollY = window.scrollY;
       tops = targets.map((t) => t.el.getBoundingClientRect().top + scrollY);
@@ -129,7 +140,7 @@ export default function Header() {
   };
   const openContact = () => {
     setMobileOpen(false);
-    setContactOpen(true);
+    openContactStore();
   };
   const scrollTop = () => {
     setActiveIndex(null);
@@ -137,10 +148,17 @@ export default function Header() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const itemTone = (active: boolean, isContact: boolean) => {
+  const itemTone = (active: boolean, key: NavItem["key"]) => {
     if (active) return "text-white";
-    if (isContact) return "bg-black/[0.06] text-ink hover:bg-black/[0.1]";
+    if (key === "contact")
+      return "bg-black/[0.06] text-ink hover:bg-black/[0.1]";
     return "text-ink/75 hover:text-ink";
+  };
+
+  const currentLang = i18n.language.split("-")[0];
+  const setLang = (lng: string) => {
+    if (lng === currentLang) return;
+    i18n.changeLanguage(lng).then(() => window.location.reload());
   };
 
   return (
@@ -177,14 +195,17 @@ export default function Header() {
             {navItems.map((item, i) => {
               const active = activeIndex === i;
               const isContact = item.panel === "contact";
+              const label = t(`nav.${item.key}`);
               return (
                 <button
-                  key={item.label}
+                  key={item.key}
                   ref={(el) => {
                     itemRefs.current[i] = el;
                   }}
-                  onClick={() => (isContact ? openContact() : goTo(item.href!, i))}
-                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, isContact)}`}
+                  onClick={() =>
+                    isContact ? openContact() : goTo(item.href!, i)
+                  }
+                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, item.key)}`}
                 >
                   <span
                     className={`block h-6 overflow-hidden ${active ? "" : "group/label"}`}
@@ -197,10 +218,10 @@ export default function Header() {
                       <span
                         className={`block h-6 leading-6 ${active ? "text-white" : ""}`}
                       >
-                        {item.label}
+                        {label}
                       </span>
                       <span className="block h-6 leading-6 text-flame">
-                        {item.label}
+                        {label}
                       </span>
                     </span>
                   </span>
@@ -216,7 +237,7 @@ export default function Header() {
             className="nav-glass flex cursor-pointer items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-ink shadow-[0_8px_24px_rgba(0,0,0,0.18)] ring-1 ring-black/5"
           >
             <span className="h-2 w-2 rounded-full bg-flame" />
-            Menu
+            {t("header.menu")}
           </button>
         </div>
       </header>
@@ -235,38 +256,60 @@ export default function Header() {
             <div className="flex items-center justify-between px-5 pt-5 pb-3">
               <span className="flex items-center gap-2 text-sm font-semibold text-ink">
                 <span className="h-2.5 w-2.5 rounded-full bg-flame" />
-                Menu
+                {t("header.menu")}
               </span>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="cursor-pointer text-sm font-medium text-ink/50 hover:text-ink"
               >
-                Close
+                {t("header.close")}
               </button>
             </div>
             <div className="mx-5 h-px bg-black/5" />
             <nav className="flex flex-col px-3 py-3">
-              {navItems.map((item, i) => (
+              {navItems.map((item, i) => {
+                const mobileTone =
+                  activeIndex === i
+                    ? "bg-flame text-white"
+                    : "text-ink/80 hover:bg-black/5";
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() =>
+                      item.panel === "contact"
+                        ? openContact()
+                        : goTo(item.href!, i)
+                    }
+                    className={`cursor-pointer rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${mobileTone}`}
+                  >
+                    {t(`nav.${item.key}`)}
+                  </button>
+                );
+              })}
+            </nav>
+            <div className="mx-5 h-px bg-black/5" />
+            <div className="flex items-center gap-1 px-3 py-3">
+              {LANGUAGES.map((lng) => (
                 <button
-                  key={item.label}
-                  onClick={() =>
-                    item.panel === "contact" ? openContact() : goTo(item.href!, i)
-                  }
-                  className={`cursor-pointer rounded-2xl px-4 py-3 text-left text-base font-medium transition-colors ${
-                    activeIndex === i
+                  key={lng}
+                  type="button"
+                  onClick={() => setLang(lng)}
+                  aria-pressed={currentLang === lng}
+                  className={`flex-1 cursor-pointer rounded-2xl px-4 py-2 text-center text-sm font-medium uppercase transition-colors ${
+                    currentLang === lng
                       ? "bg-flame text-white"
-                      : "text-ink/80 hover:bg-black/5"
+                      : "text-ink/70 hover:bg-black/5"
                   }`}
                 >
-                  {item.label}
+                  {lng}
                 </button>
               ))}
-            </nav>
+            </div>
           </div>
         </div>
       )}
 
-      <ContactPanel open={contactOpen} onClose={() => setContactOpen(false)} />
+      <ContactPanel open={contactOpen} onClose={closeContact} />
     </>
   );
 }

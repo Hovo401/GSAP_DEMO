@@ -12,8 +12,6 @@ const sectionLoaders = {
   StudioCanvas: () => import("../sections/StudioCanvas"),
   Approach: () => import("../sections/Approach"),
   Stats: () => import("../sections/Stats"),
-  Pricing: () => import("../sections/Pricing"),
-  CTA: () => import("../sections/CTA"),
   MagicReveal: () => import("../sections/MagicReveal"),
   Footer: () => import("../sections/Footer"),
 };
@@ -23,8 +21,6 @@ const Features = lazy(sectionLoaders.Features);
 const StudioCanvas = lazy(sectionLoaders.StudioCanvas);
 const Approach = lazy(sectionLoaders.Approach);
 const Stats = lazy(sectionLoaders.Stats);
-const Pricing = lazy(sectionLoaders.Pricing);
-const CTA = lazy(sectionLoaders.CTA);
 const MagicReveal = lazy(sectionLoaders.MagicReveal);
 const Footer = lazy(sectionLoaders.Footer);
 
@@ -48,7 +44,9 @@ export default function Home() {
       const next = (i: number) => {
         if (cancelled) return;
         if (i >= loaders.length) {
-          requestAnimationFrame(() => globalThis.dispatchEvent(new Event("app:sections-ready")));
+          requestAnimationFrame(() =>
+            globalThis.dispatchEvent(new Event("app:sections-ready")),
+          );
           return;
         }
         idle(() => {
@@ -86,7 +84,8 @@ export default function Home() {
       maybeRefresh();
     });
 
-    return () => globalThis.removeEventListener("app:preload-done", onPreloadDone);
+    return () =>
+      globalThis.removeEventListener("app:preload-done", onPreloadDone);
   }, []);
 
   return (
@@ -102,8 +101,6 @@ export default function Home() {
         <StudioCanvas />
         <Approach />
         <Stats />
-        <Pricing />
-        <CTA />
         <MagicReveal />
         <Footer />
       </Suspense>

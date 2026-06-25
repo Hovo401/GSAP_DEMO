@@ -1,11 +1,20 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, useGSAP } from "../lib/gsap";
-import { hero, brand } from "../content/site";
+import { brand } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useSplitReveal } from "../hooks/useSplitReveal";
 import { DURATION, EASE, STAGGER } from "../lib/motion";
 
+const LANGUAGES = ["en", "ru"] as const;
+
 export default function Hero() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language.split("-")[0];
+  const setLang = (lng: string) => {
+    if (lng === currentLang) return;
+    i18n.changeLanguage(lng).then(() => window.location.reload());
+  };
   const root = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const tiltRef = useRef<HTMLDivElement>(null);
@@ -216,13 +225,9 @@ export default function Hero() {
   );
 
   const renderTitle = () =>
-    hero.titleLines.map((line) => (
+    [t("hero.titleLine1"), t("hero.titleLine2")].map((line, i) => (
       <span key={line} className="block overflow-hidden">
-        <span
-          className={line === hero.accentWord ? "text-flame" : "text-paper"}
-        >
-          {line}
-        </span>
+        <span className={i === 1 ? "text-flame" : "text-paper"}>{line}</span>
       </span>
     ));
 
@@ -268,14 +273,32 @@ export default function Hero() {
         }}
       />
 
+      <div className="hero-meta absolute top-6 right-6 hidden items-center gap-1 rounded-full border border-paper/15 p-1 md:right-10 md:flex">
+        {LANGUAGES.map((lng) => (
+          <button
+            key={lng}
+            type="button"
+            onClick={() => setLang(lng)}
+            aria-pressed={currentLang === lng}
+            className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium tracking-widest uppercase transition-colors duration-200 ${
+              currentLang === lng
+                ? "bg-flame text-white"
+                : "text-paper/55 hover:text-paper"
+            }`}
+          >
+            {lng}
+          </button>
+        ))}
+      </div>
+
       <span className="hero-meta absolute top-24 left-6 hidden text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:left-10">
-        Est. 2026
+        {t("hero.metaTopLeft")}
       </span>
       <span className="hero-meta absolute top-24 right-6 hidden text-right text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:right-10">
-        v1.0 / GSAP
+        {t("hero.metaTopRight")}
       </span>
       <span className="hero-meta absolute bottom-10 left-6 hidden text-xs font-medium tracking-[0.3em] text-paper/35 uppercase md:block md:left-10">
-        40°N — 44°E
+        {t("hero.metaBottom")}
       </span>
 
       <div
@@ -287,7 +310,7 @@ export default function Hero() {
           <div ref={kickerWrapRef} className="will-change-transform">
             <p className="hero-fade mb-6 flex items-center justify-center gap-3 text-sm font-medium tracking-[0.4em] text-flame uppercase">
               <span className="h-px w-8 bg-flame/60" />
-              {brand.name} — {hero.kicker}
+              {brand.name} — {t("hero.kicker")}
               <span className="h-px w-8 bg-flame/60" />
             </p>
           </div>
@@ -301,7 +324,7 @@ export default function Hero() {
           </div>
           <div ref={subtitleWrapRef} className="will-change-transform">
             <p className="hero-fade mx-auto mt-8 max-w-xl text-lg font-light text-paper/60 md:text-2xl">
-              {hero.subtitle}
+              {t("hero.subtitle")}
             </p>
           </div>
         </div>
@@ -311,7 +334,7 @@ export default function Hero() {
         ref={hintRef}
         className="absolute bottom-10 left-1/2 flex flex-col items-center gap-2 text-xs font-medium tracking-[0.3em] text-paper/40 uppercase"
       >
-        {hero.scrollHint}
+        {t("hero.scrollHint")}
         <span className="text-flame">↓</span>
       </div>
     </section>

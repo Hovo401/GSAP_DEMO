@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, SplitText, useGSAP } from "../../lib/gsap";
 import { brand } from "../../content/site";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
@@ -6,6 +7,7 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 const COLUMNS = 6;
 
 export default function Preloader() {
+  const { t } = useTranslation();
   const root = useRef<HTMLDivElement>(null);
   const wordRef = useRef<HTMLHeadingElement>(null);
   const countRef = useRef<HTMLSpanElement>(null);
@@ -91,12 +93,12 @@ export default function Preloader() {
           </h1>
         </div>
         <p className="loader-tag mt-2 text-xs font-medium tracking-[0.5em] text-flame uppercase md:text-sm">
-          {brand.tagline}
+          {t("brand.tagline")}
         </p>
 
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-6 md:px-12">
           <span className="text-xs font-medium tracking-[0.3em] text-paper/40 uppercase">
-            Loading
+            {t("preloader.loading")}
           </span>
           <span className="font-display text-5xl leading-none text-paper md:text-7xl">
             <span ref={countRef}>0</span>

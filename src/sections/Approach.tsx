@@ -1,12 +1,23 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { gsap, ScrollTrigger, useGSAP } from "../lib/gsap";
-import { approach } from "../content/site";
+import { approachTones } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { approachDecor } from "./approach/decor";
 
+type ApproachItem = { title: string; body: string };
+
 export default function Approach() {
+  const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
+  const approach = (
+    t("approach.items", { returnObjects: true }) as ApproachItem[]
+  ).map((item, i) => ({
+    no: String(i + 1).padStart(2, "0"),
+    tone: approachTones[i],
+    ...item,
+  }));
 
   useGSAP(
     () => {
