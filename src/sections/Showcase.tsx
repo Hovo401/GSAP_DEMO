@@ -91,7 +91,7 @@ export default function Showcase() {
         <div
           ref={carrierRef}
           aria-hidden
-          className="showcase-goo pointer-events-none absolute top-0 left-0 z-10 h-[clamp(3rem,6vw,6rem)] w-[clamp(3rem,6vw,6rem)]"
+          className="showcase-goo pointer-events-none absolute top-0 left-0 z-10 h-[clamp(2rem,4vw,4rem)] w-[clamp(2rem,4vw,4rem)]"
         >
           <div ref={leadFillRef} className="showcase-blob-shape" />
           {[0].map((i) => (
@@ -128,7 +128,11 @@ export default function Showcase() {
               height="200%"
               colorInterpolationFilters="sRGB"
             >
-              <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+              <feGaussianBlur
+                in="SourceGraphic"
+                stdDeviation="7"
+                result="blur"
+              />
               <feColorMatrix
                 in="blur"
                 mode="matrix"
@@ -162,8 +166,9 @@ export default function Showcase() {
         {showcase.map((item) => (
           <article
             key={item.no}
-            className="showcase-card group flex h-full w-[82vw] shrink-0 items-end pb-[6vh] px-3 sm:w-[58vw] md:w-[34vw]"
+            className="showcase-card group flex h-full w-[92vw] shrink-0 flex-col px-3 sm:w-[68vw] md:w-[34vw]"
           >
+            <div aria-hidden className="h-[clamp(12rem,26vh,16rem)] shrink-0" />
             <button
               type="button"
               data-magnetic
@@ -172,7 +177,7 @@ export default function Showcase() {
               }}
               onClick={() => setActive(item)}
               aria-label={`Open ${item.title} case study`}
-              className="relative flex h-[58vh] w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
+              className="relative mb-[6vh] flex w-full flex-1 cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
             >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
