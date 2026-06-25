@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "../lib/gsap";
 import { approach } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import OrbitDecor from "../components/ui/OrbitDecor";
+import { approachDecor } from "./approach/decor";
 
 export default function Approach() {
   const root = useRef<HTMLElement>(null);
@@ -31,13 +31,10 @@ export default function Approach() {
   );
 
   return (
-    <section
-      id="approach"
-      ref={root}
-      className="relative bg-paper pb-[36vh]"
-    >
+    <section id="approach" ref={root} className="relative bg-paper pb-[36vh]">
       {approach.map((step, i) => {
         const dark = step.tone === "ink";
+        const Decor = approachDecor[i];
         return (
           <div
             key={step.no}
@@ -45,22 +42,22 @@ export default function Approach() {
             style={{ zIndex: i + 1 }}
           >
             <div
-              className={`card-bg relative mx-auto flex h-[calc(64vh-6.5rem)] w-full max-w-[1500px] flex-col overflow-hidden rounded-[2.5rem] px-8 py-12 md:px-16 md:py-14 ${
+              className={`card-bg relative mx-auto flex h-[calc(64vh-6.5rem)] w-full max-w-[min(92vw,2200px)] flex-col overflow-hidden rounded-[2.5rem] px-8 py-12 md:px-16 md:py-14 ${
                 dark ? "bg-ink text-paper" : "bg-flame text-paper"
               }`}
             >
-              <span className="text-base font-medium opacity-60 md:text-lg">
+              <span className="relative z-10 text-sm font-medium tracking-[0.3em] opacity-60 md:text-base">
                 ({step.no})
               </span>
-              <h3 className="font-display mt-3 text-[13vw] leading-[0.9] uppercase md:text-[6.5vw]">
+              <h3 className="font-display relative z-10 mt-4 text-[13vw] leading-[0.9] uppercase md:text-[6.5vw]">
                 {step.title}
               </h3>
-              <p className="mt-auto max-w-md text-base font-light opacity-80 md:text-2xl">
+              <p className="relative z-10 mt-auto max-w-sm text-base font-light text-balance opacity-80 md:max-w-md md:text-2xl">
                 {step.body}
               </p>
 
-              <OrbitDecor
-                className={`pointer-events-none absolute -right-10 -bottom-10 h-[58vh] w-[58vh] md:right-0 md:-bottom-6 ${
+              <Decor
+                className={`pointer-events-none absolute -right-8 -bottom-8 h-[42vh] w-[42vh] opacity-50 md:right-0 md:-bottom-6 md:h-[58vh] md:w-[58vh] md:opacity-100 ${
                   dark ? "text-paper/70" : "text-paper/80"
                 }`}
               />

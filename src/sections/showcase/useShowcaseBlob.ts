@@ -3,33 +3,16 @@ import { gsap, ScrollTrigger, useGSAP } from "../../lib/gsap";
 import { EASE } from "../../lib/motion";
 
 type BlobRefs = {
-  lead: RefObject<HTMLDivElement | null>;
-  satellites: RefObject<(HTMLDivElement | null)[]>;
+  carrier: RefObject<HTMLDivElement | null>;
+  leadFill: RefObject<HTMLDivElement | null>;
+  droplets: RefObject<(HTMLDivElement | null)[]>;
+  sparks: RefObject<(HTMLDivElement | null)[]>;
 };
 
 const PALETTE = ["#f55438", "#38e0d0", "#9b5cf6", "#c6f553"];
 
-const POINTS = 16;
-const poly = (radiusAt: (i: number) => number) =>
-  "polygon(" +
-  Array.from({ length: POINTS }, (_, i) => {
-    const a = (-90 + i * (360 / POINTS)) * (Math.PI / 180);
-    const r = radiusAt(i);
-    return `${(50 + r * Math.cos(a)).toFixed(1)}% ${(50 + r * Math.sin(a)).toFixed(1)}%`;
-  }).join(", ") +
-  ")";
-
-const SHAPES = {
-  blob: poly((i) => 45 + 4 * Math.sin((i / POINTS) * Math.PI * 6)),
-  squircle: poly((i) => 38 + 7 * Math.cos(i * (Math.PI / 2))),
-  star: poly((i) => (i % 2 === 0 ? 48 : 21)),
-  hexagon: poly((i) => 42 + 5 * Math.cos(i * (Math.PI * 0.75))),
-  diamond: poly((i) => 36 + 14 * Math.cos(i * (Math.PI / 2))),
-};
-
-const CARD_SHAPES = [SHAPES.blob, SHAPES.hexagon, SHAPES.squircle, SHAPES.star];
-
 const BOUNCE_PX = 150;
+const END_RUSH = 0.7;
 
 type Kind = "start" | "card" | "end";
 type Target = { cx: number; topY: number; p: number; kind: Kind };
@@ -43,14 +26,17 @@ export function useShowcaseBlob(
   useGSAP(
     () => {
       const trackEl = track.current;
-      const lead = blobs.lead.current;
-      const core = lead?.querySelector<HTMLElement>(".showcase-blob-shape") ?? null;
-      const aura = lead?.querySelector<HTMLElement>(".showcase-blob-aura") ?? null;
-      if (reduced || !trackEl || !lead || !core || !aura) return;
-
-      const satellites = (blobs.satellites.current ?? []).filter(
+      const carrier = blobs.carrier.current;
+      const leadFill = blobs.leadFill.current;
+      const droplets = (blobs.droplets.current ?? []).filter(
         (el): el is HTMLDivElement => el !== null,
       );
+      const sparks = (blobs.sparks.current ?? []).filter(
+        (el): el is HTMLDivElement => el !== null,
+      );
+      if (reduced || !trackEl || !carrier || !leadFill) return;
+
+      const fills = [leadFill, ...droplets];
 
       const distance = () => trackEl.scrollWidth - window.innerWidth;
 
@@ -70,12 +56,14 @@ export function useShowcaseBlob(
         const dist = distance();
         const half = window.innerWidth / 2;
         const headerEl = document.querySelector("header");
-        const safeTop =
-          (headerEl?.getBoundingClientRect().bottom ?? 76) + 16;
+        const safeTop = (headerEl?.getBoundingClientRect().bottom ?? 76) + 16;
         const bounce = Math.min(BOUNCE_PX, window.innerHeight * 0.16);
 
-        const at = (cx: number, kind: Kind): number =>
-          kind === "start" ? 0 : kind === "end" ? 1 : gsap.utils.clamp(0.04, 0.96, (cx - half) / dist);
+        const at = (cx: number, kind: Kind): number => {
+          if (kind === "start") return 0;
+          if (kind === "end") return 1;
+          return gsap.utils.clamp(0.04, 0.96, (cx - half) / dist);
+        };
 
         const targets: Target[] = [];
 
@@ -86,13 +74,15 @@ export function useShowcaseBlob(
           targets.push({ cx, topY: o.y, p: 0, kind: "start" });
         }
 
-        trackEl.querySelectorAll<HTMLElement>(".showcase-card").forEach((card) => {
-          const btn = card.querySelector<HTMLElement>("[data-magnetic]");
-          if (!btn) return;
-          const o = offsetIn(btn);
-          const cx = o.x + btn.offsetWidth / 2;
-          targets.push({ cx, topY: o.y, p: at(cx, "card"), kind: "card" });
-        });
+        trackEl
+          .querySelectorAll<HTMLElement>(".showcase-card")
+          .forEach((card) => {
+            const btn = card.querySelector<HTMLElement>("[data-magnetic]");
+            if (!btn) return;
+            const o = offsetIn(btn);
+            const cx = o.x + btn.offsetWidth / 2;
+            targets.push({ cx, topY: o.y, p: at(cx, "card"), kind: "card" });
+          });
 
         const endEl = trackEl.querySelector<HTMLElement>("[data-blob-end]");
         if (endEl) {
@@ -106,15 +96,23 @@ export function useShowcaseBlob(
 
       const restY = (t: Target, radius: number) =>
         t.topY - radius - (t.kind === "card" ? 2 : 10);
-      const apexY = (t: Target, radius: number, bounce: number, safeTop: number) =>
-        Math.max(restY(t, radius) - bounce, safeTop + radius);
+      const apexY = (
+        t: Target,
+        radius: number,
+        bounce: number,
+        safeTop: number,
+      ) => Math.max(restY(t, radius) - bounce, safeTop + radius);
 
-      const buildLead = (targets: Target[], bounce: number, safeTop: number) => {
-        const radius = lead.offsetHeight / 2;
+      const buildJourney = (
+        targets: Target[],
+        bounce: number,
+        safeTop: number,
+      ) => {
+        const radius = carrier.offsetHeight / 2;
         const first = targets[0];
 
         tl.set(
-          lead,
+          carrier,
           {
             xPercent: -50,
             yPercent: -50,
@@ -123,54 +121,142 @@ export function useShowcaseBlob(
             y: restY(first, radius),
             scaleX: 0,
             scaleY: 0,
+            "--goo-glow": PALETTE[0],
           },
           0,
         );
-        tl.set(core, { clipPath: SHAPES.star, backgroundColor: PALETTE[0] }, 0);
-        tl.set(aura, { color: PALETTE[0] }, 0);
+        tl.set(fills, { backgroundColor: PALETTE[0] }, 0);
 
         const emerge = Math.min(0.05, (targets[1]?.p ?? 0.1) * 0.6);
-        tl.to(lead, { scaleX: 1, scaleY: 1, duration: emerge, ease: "back.out(1.8)" }, 0);
-        tl.to(core, { clipPath: SHAPES.blob, duration: emerge * 1.6, ease: EASE.softOut }, 0);
+        tl.to(
+          carrier,
+          { scaleX: 1, scaleY: 1, duration: emerge, ease: "back.out(1.8)" },
+          0,
+        );
+
+        let fadeAt = 1 + emerge;
 
         for (let i = 1; i < targets.length; i++) {
           const prev = targets[i - 1];
           const t = targets[i];
           const start = prev.p;
           const land = t.p;
-          const dur = Math.max(land - start, 0.001);
+          const isEnd = t.kind === "end";
+          const dur = Math.max((land - start) * (isEnd ? END_RUSH : 1), 0.001);
+          const finish = start + dur;
           const color = PALETTE[i % PALETTE.length];
 
-          tl.to(lead, { x: t.cx, duration: dur, ease: EASE.none }, start);
-          tl.to(lead, { y: apexY(t, radius, bounce, safeTop), duration: dur * 0.5, ease: EASE.softOut }, start);
-          tl.to(lead, { y: restY(t, radius), duration: dur * 0.5, ease: EASE.in }, start + dur * 0.5);
+          tl.to(carrier, { x: t.cx, duration: dur, ease: EASE.none }, start);
+          tl.to(
+            carrier,
+            {
+              y: apexY(t, radius, bounce, safeTop),
+              duration: dur * 0.5,
+              ease: EASE.softOut,
+            },
+            start,
+          );
+          tl.to(
+            carrier,
+            { y: restY(t, radius), duration: dur * 0.5, ease: EASE.in },
+            start + dur * 0.5,
+          );
 
-          const shape = t.kind === "end" ? SHAPES.diamond : CARD_SHAPES[i % CARD_SHAPES.length];
-          tl.to(core, { clipPath: shape, duration: dur * 0.6, ease: "sine.inOut" }, start + dur * 0.2);
-          tl.to(core, { backgroundColor: color, duration: dur * 0.4 }, land - dur * 0.2);
-          tl.to(aura, { color, duration: dur * 0.4 }, land - dur * 0.2);
+          tl.to(
+            carrier,
+            {
+              scaleX: 0.88,
+              scaleY: 1.16,
+              duration: dur * 0.4,
+              ease: EASE.softOut,
+            },
+            start,
+          );
+
+          tl.to(
+            fills,
+            { backgroundColor: color, duration: dur * 0.4 },
+            finish - dur * 0.25,
+          );
+          tl.set(carrier, { "--goo-glow": color }, finish - dur * 0.1);
 
           if (t.kind === "card") {
-            tl.to(lead, { scaleX: 1.3, scaleY: 0.64, duration: dur * 0.14, ease: EASE.in }, land - dur * 0.14);
-            tl.to(lead, { scaleX: 1, scaleY: 1, duration: dur * 0.3, ease: "elastic.out(1, 0.45)" }, land);
+            tl.to(
+              carrier,
+              {
+                scaleX: 1.32,
+                scaleY: 0.62,
+                duration: dur * 0.14,
+                ease: EASE.in,
+              },
+              land - dur * 0.14,
+            );
+            tl.to(
+              carrier,
+              {
+                scaleX: 1,
+                scaleY: 1,
+                duration: dur * 0.3,
+                ease: "elastic.out(1, 0.45)",
+              },
+              land,
+            );
           } else if (t.kind === "end") {
-            tl.to(lead, { scaleX: 1.25, scaleY: 0.82, duration: dur * 0.12, ease: EASE.in }, land - dur * 0.12);
-            tl.to(lead, { scaleX: 1, scaleY: 1, duration: dur * 0.32, ease: "elastic.out(1, 0.5)" }, land);
+            const settle = dur * 0.55;
+            const squishAt = finish - settle;
+            const squishDur = settle * 0.18;
+            const recoverDur = settle * 0.42;
+            fadeAt = squishAt + squishDur + recoverDur;
+            tl.to(
+              carrier,
+              { scaleX: 1.4, scaleY: 0.7, duration: squishDur, ease: EASE.in },
+              squishAt,
+            );
+            tl.to(
+              carrier,
+              {
+                scaleX: 1,
+                scaleY: 1,
+                duration: recoverDur,
+                ease: "elastic.out(1, 0.5)",
+              },
+              squishAt + squishDur,
+            );
+            tl.to(
+              carrier,
+              {
+                scaleX: 0,
+                scaleY: 0,
+                duration: finish - fadeAt,
+                ease: "back.in(1.8)",
+              },
+              fadeAt,
+            );
           }
         }
+
+        return fadeAt;
       };
 
-      const buildSat = (sat: HTMLDivElement, targets: Target[], idx: number, bounce: number, safeTop: number) => {
-        const radius = sat.offsetHeight / 2;
-        const gap = 34 + idx * 22;
-        const lag = 0.03 + idx * 0.025;
-        const satBounce = bounce * (0.6 - idx * 0.12);
+      const buildSpark = (
+        spark: HTMLDivElement,
+        targets: Target[],
+        idx: number,
+        bounce: number,
+        safeTop: number,
+        fadeAt: number,
+      ) => {
+        const radius = spark.offsetHeight / 2;
+        const gap = 46 + idx * 26;
+        const lag = 0.04 + idx * 0.03;
+        const sparkBounce = bounce * (0.85 + idx * 0.18);
         const first = targets[0];
         const sRest = (t: Target) => t.topY - radius - gap;
-        const sApex = (t: Target) => Math.max(sRest(t) - satBounce, safeTop + radius);
+        const sApex = (t: Target) =>
+          Math.max(sRest(t) - sparkBounce, safeTop + radius);
 
         tl.set(
-          sat,
+          spark,
           {
             xPercent: -50,
             yPercent: -50,
@@ -182,7 +268,12 @@ export function useShowcaseBlob(
           },
           0,
         );
-        tl.to(sat, { scale: 1, duration: 0.05, ease: "back.out(2)" }, lag);
+        const restScale = 1.35 - idx * 0.32;
+        tl.to(
+          spark,
+          { scale: restScale, duration: 0.05, ease: "back.out(2)" },
+          lag,
+        );
 
         for (let i = 1; i < targets.length; i++) {
           const prev = targets[i - 1];
@@ -192,11 +283,29 @@ export function useShowcaseBlob(
           const dur = Math.max(land - start, 0.001);
           const color = PALETTE[(i + idx + 1) % PALETTE.length];
 
-          tl.to(sat, { x: t.cx, duration: dur, ease: EASE.none }, start);
-          tl.to(sat, { y: sApex(t), duration: dur * 0.5, ease: EASE.softOut }, start);
-          tl.to(sat, { y: sRest(t), duration: dur * 0.5, ease: EASE.in }, start + dur * 0.5);
-          tl.to(sat, { backgroundColor: color, color, duration: dur * 0.4 }, land - dur * 0.2);
+          tl.to(spark, { x: t.cx, duration: dur, ease: EASE.none }, start);
+          tl.to(
+            spark,
+            { y: sApex(t), duration: dur * 0.5, ease: EASE.softOut },
+            start,
+          );
+          tl.to(
+            spark,
+            { y: sRest(t), duration: dur * 0.5, ease: EASE.in },
+            start + dur * 0.5,
+          );
+          tl.to(
+            spark,
+            { backgroundColor: color, color, duration: dur * 0.4 },
+            land - dur * 0.2,
+          );
         }
+
+        tl.to(
+          spark,
+          { scale: 0, duration: 1 - fadeAt, ease: "back.in(1.8)" },
+          fadeAt,
+        );
       };
 
       const tl = gsap.timeline({ paused: true });
@@ -205,8 +314,10 @@ export function useShowcaseBlob(
         tl.clear();
         const { targets, safeTop, bounce } = compute();
         if (targets.length < 2) return;
-        buildLead(targets, bounce, safeTop);
-        satellites.forEach((sat, i) => buildSat(sat, targets, i, bounce, safeTop));
+        const fadeAt = buildJourney(targets, bounce, safeTop);
+        sparks.forEach((spark, i) =>
+          buildSpark(spark, targets, i, bounce, safeTop, fadeAt),
+        );
       };
 
       build();
@@ -220,10 +331,50 @@ export function useShowcaseBlob(
         onRefresh: build,
       });
 
-      gsap.set(core, { rotation: -5 });
-      gsap.to(core, { rotation: 5, duration: 1.8, ease: "sine.inOut", repeat: -1, yoyo: true });
-      gsap.to(core, { scale: 1.07, duration: 2.4, ease: "sine.inOut", repeat: -1, yoyo: true });
-      gsap.to(aura, { scale: 1.12, duration: 3.2, ease: "sine.inOut", repeat: -1, yoyo: true });
+      // Continuous liquid life — scroll-independent, only local offsets/shape
+      // (never the carrier's journey x/y or squash), so the cluster stays alive
+      // when scroll stops and droplets drift in/out of the lead to merge/split.
+      gsap.to(leadFill, {
+        borderRadius: "58% 42% 39% 61% / 47% 56% 44% 53%",
+        duration: 3.2,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+      gsap.to(leadFill, {
+        scale: 1.06,
+        duration: 2.4,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+
+      droplets.forEach((drop, i) => {
+        const orbit = carrier.offsetHeight * (0.42 + i * 0.18);
+        gsap.set(drop, { xPercent: -50, yPercent: -50 });
+        gsap.fromTo(
+          drop,
+          { x: -orbit },
+          {
+            x: orbit,
+            duration: 1.6 + i * 0.5,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          },
+        );
+        gsap.fromTo(
+          drop,
+          { y: orbit * 0.5 },
+          {
+            y: -orbit * 0.4,
+            duration: 2.1 + i * 0.6,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          },
+        );
+      });
     },
     { scope: root, dependencies: [reduced] },
   );

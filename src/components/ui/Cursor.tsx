@@ -95,7 +95,9 @@ export default function Cursor() {
         const target = (e.target as HTMLElement)?.closest<HTMLElement>(
           "[data-magnetic], a, button",
         );
-        const card = (e.target as HTMLElement)?.closest(".showcase-card");
+        const card = (e.target as HTMLElement)?.closest(
+          ".showcase-card [data-magnetic]",
+        );
         const studioNode = (e.target as HTMLElement)?.closest(".studio-stage");
         if (studioNode) {
           setOnCard(false);

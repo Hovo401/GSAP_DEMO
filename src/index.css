@@ -91,56 +91,45 @@ html {
   -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
-.showcase-blob {
-  will-change: transform;
-}
-.showcase-blob-aura {
-  position: absolute;
-  inset: -45%;
-  border-radius: 50%;
+.showcase-goo {
   color: var(--color-flame);
-  background: radial-gradient(
-    circle at center,
-    color-mix(in srgb, currentColor 65%, transparent),
-    transparent 70%
-  );
-  filter: blur(12px);
-  mix-blend-mode: screen;
+  filter: url(#showcase-goo)
+    drop-shadow(0 0 16px var(--goo-glow, var(--color-flame)));
   will-change: transform;
 }
 .showcase-blob-shape {
+  position: absolute;
+  inset: 0;
   background-color: var(--color-flame);
-  clip-path: polygon(
-    50% 0%,
-    63.4% 36.6%,
-    100% 50%,
-    63.4% 63.4%,
-    50% 100%,
-    36.6% 63.4%,
-    0% 50%,
-    36.6% 36.6%
-  );
-  will-change: transform, clip-path;
+  border-radius: 46% 54% 56% 44% / 52% 48% 52% 48%;
+  will-change: transform, border-radius;
 }
 .showcase-blob-sat {
-  height: 1.6rem;
-  width: 1.6rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: clamp(1rem, 1.4vw, 1.75rem);
+  width: clamp(1rem, 1.4vw, 1.75rem);
+  border-radius: 50%;
+  background-color: var(--color-flame);
+}
+.showcase-spark {
+  height: clamp(1.25rem, 1.9vw, 2.25rem);
+  width: clamp(1.25rem, 1.9vw, 2.25rem);
   border-radius: 50%;
   background-color: var(--color-flame);
   color: var(--color-flame);
-  box-shadow: 0 0 22px -2px currentColor;
+  box-shadow: 0 0 16px -1px currentColor;
   mix-blend-mode: screen;
-}
-.showcase-blob-sat ~ .showcase-blob-sat {
-  height: 1rem;
-  width: 1rem;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .grain::after {
     display: none;
   }
-  .showcase-blob {
+  .showcase-goo,
+  .showcase-spark {
     display: none;
   }
 }

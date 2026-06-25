@@ -14,14 +14,21 @@ export default function Showcase() {
   const introHeadingRef = useScramble<HTMLHeadingElement>(showcaseIntro.title);
 
   const cardRefs = useRef<Record<string, HTMLElement | null>>({});
-  const leadBlobRef = useRef<HTMLDivElement>(null);
-  const satelliteRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const carrierRef = useRef<HTMLDivElement>(null);
+  const leadFillRef = useRef<HTMLDivElement>(null);
+  const dropletRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sparkRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState<Project | null>(null);
 
   useShowcaseBlob(
     root,
     trackRef,
-    { lead: leadBlobRef, satellites: satelliteRefs },
+    {
+      carrier: carrierRef,
+      leadFill: leadFillRef,
+      droplets: dropletRefs,
+      sparks: sparkRefs,
+    },
     reduced,
   );
 
@@ -82,23 +89,59 @@ export default function Showcase() {
         className="relative flex h-screen w-max items-center will-change-transform"
       >
         <div
-          ref={leadBlobRef}
+          ref={carrierRef}
           aria-hidden
-          className="showcase-blob pointer-events-none absolute top-0 left-0 z-10 h-12 w-12 md:h-24 md:w-24"
+          className="showcase-goo pointer-events-none absolute top-0 left-0 z-10 h-[clamp(2rem,4vw,4rem)] w-[clamp(2rem,4vw,4rem)]"
         >
-          <div className="showcase-blob-aura" />
-          <div className="showcase-blob-shape h-full w-full" />
+          <div ref={leadFillRef} className="showcase-blob-shape" />
+          {[0].map((i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                dropletRefs.current[i] = el;
+              }}
+              className="showcase-blob-sat"
+            />
+          ))}
         </div>
-        {[0, 1].map((i) => (
+        {[0, 1, 2].map((i) => (
           <div
             key={i}
             ref={(el) => {
-              satelliteRefs.current[i] = el;
+              sparkRefs.current[i] = el;
             }}
             aria-hidden
-            className="showcase-blob showcase-blob-sat pointer-events-none absolute top-0 left-0 z-10"
+            className="showcase-spark pointer-events-none absolute top-0 left-0 z-10"
           />
         ))}
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute h-0 w-0"
+          focusable="false"
+        >
+          <defs>
+            <filter
+              id="showcase-goo"
+              x="-50%"
+              y="-50%"
+              width="200%"
+              height="200%"
+              colorInterpolationFilters="sRGB"
+            >
+              <feGaussianBlur
+                in="SourceGraphic"
+                stdDeviation="7"
+                result="blur"
+              />
+              <feColorMatrix
+                in="blur"
+                mode="matrix"
+                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                result="goo"
+              />
+            </filter>
+          </defs>
+        </svg>
 
         <div className="flex h-full w-screen shrink-0 flex-col justify-center px-8 md:w-[55vw] md:px-24">
           <p className="text-sm font-medium tracking-[0.4em] text-flame uppercase">
@@ -123,8 +166,9 @@ export default function Showcase() {
         {showcase.map((item) => (
           <article
             key={item.no}
-            className="showcase-card group flex h-full w-[82vw] shrink-0 items-end pb-[6vh] px-3 sm:w-[58vw] md:w-[34vw]"
+            className="showcase-card group flex h-full w-[92vw] shrink-0 flex-col px-3 sm:w-[68vw] md:w-[34vw]"
           >
+            <div aria-hidden className="h-[clamp(12rem,26vh,16rem)] shrink-0" />
             <button
               type="button"
               data-magnetic
@@ -133,26 +177,26 @@ export default function Showcase() {
               }}
               onClick={() => setActive(item)}
               aria-label={`Open ${item.title} case study`}
-              className="relative flex h-[58vh] w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
+              className="relative mb-[6vh] flex w-full flex-1 cursor-pointer flex-col overflow-hidden rounded-3xl border border-paper/12 bg-[#161616] p-8 text-left transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-flame/40 group-hover:shadow-[0_30px_80px_-20px_rgba(245,84,56,0.35)] md:p-10"
             >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-flame/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-              <span className="font-display pointer-events-none absolute -bottom-8 -left-2 text-[12rem] leading-none text-paper/[0.03] select-none">
+              <span className="font-display pointer-events-none absolute -bottom-8 -left-2 text-[clamp(8rem,16vw,18rem)] leading-none text-paper/[0.03] select-none">
                 {item.no}
               </span>
 
               <div className="card-reveal relative flex items-center justify-between">
-                <span className="text-base text-paper/40">({item.no})</span>
-                <span className="inline-block rounded-full border border-paper/15 px-3 py-1 text-[0.65rem] font-medium tracking-[0.25em] text-paper/45 uppercase">
+                <span className="text-[clamp(1rem,1.1vw,1.25rem)] text-paper/40">({item.no})</span>
+                <span className="inline-block rounded-full border border-paper/15 px-3 py-1 text-[clamp(0.65rem,0.9vw,0.85rem)] font-medium tracking-[0.25em] text-paper/45 uppercase">
                   {item.tag}
                 </span>
               </div>
 
-              <h3 className="card-reveal font-display relative mt-6 text-5xl leading-[0.95] text-flame uppercase md:text-6xl">
+              <h3 className="card-reveal font-display relative mt-6 text-[clamp(2.5rem,5.5vw,6rem)] leading-[0.95] text-flame uppercase">
                 {item.title}
               </h3>
 
-              <p className="card-reveal relative mt-6 max-w-sm text-base leading-relaxed text-paper/55 md:text-lg">
+              <p className="card-reveal relative mt-6 max-w-sm text-[clamp(1rem,1.3vw,1.375rem)] leading-relaxed text-paper/55">
                 {item.body}
               </p>
             </button>
