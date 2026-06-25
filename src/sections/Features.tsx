@@ -3,7 +3,7 @@ import { features } from "../content/site";
 import { useScramble } from "../hooks/useScramble";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { DURATION, STAGGER, SCROLL_START } from "../lib/motion";
-import TiltCard from "../components/ui/TiltCard";
+import TiltCard, { TiltLayer } from "../components/ui/TiltCard";
 
 export default function Features() {
   const root = useRef<HTMLElement>(null);
@@ -53,24 +53,36 @@ export default function Features() {
             <TiltCard
               key={f.no}
               wrapperClassName="feature-card"
-              className="group relative h-full overflow-hidden border-2 border-paper/20 bg-ink p-8 transition-colors duration-300 hover:border-flame md:p-10"
+              className="group relative h-full overflow-hidden border-2 border-paper/20 bg-ink p-6 transition-colors duration-300 hover:border-flame md:p-6"
             >
-              <span className="font-display pointer-events-none absolute -top-6 -right-2 text-[8rem] leading-none text-paper/[0.04] transition-colors duration-300 transform-[translateZ(-60px)] select-none group-hover:text-flame/10 md:text-[10rem]">
+              <TiltLayer
+                z={-80}
+                className="font-display pointer-events-none absolute -top-2 -right-2 text-[8rem] leading-none text-paper/[0.04] transition-colors duration-300 select-none group-hover:text-flame/10 md:text-[10rem]"
+              >
                 {f.no}
-              </span>
+              </TiltLayer>
 
-              <div className="relative flex items-center justify-between transform-[translateZ(50px)]">
+              <TiltLayer
+                z={0}
+                className="relative flex items-center justify-between"
+              >
                 <span className="font-display text-3xl text-flame">{f.no}</span>
                 <span className="text-2xl text-paper/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-flame">
                   ↗
                 </span>
-              </div>
-              <h3 className="relative mt-6 text-2xl font-bold tracking-tight transform-[translateZ(85px)] md:text-3xl">
+              </TiltLayer>
+              <TiltLayer
+                z={85}
+                className="relative mt-6 text-2xl font-bold tracking-tight md:text-3xl"
+              >
                 {f.title}
-              </h3>
-              <p className="relative mt-4 text-base font-light text-paper/60 transform-[translateZ(45px)] md:text-lg">
+              </TiltLayer>
+              <TiltLayer
+                z={85}
+                className="relative mt-4 text-base font-light text-paper/60 md:text-lg"
+              >
                 {f.body}
-              </p>
+              </TiltLayer>
 
               <span className="absolute bottom-0 left-0 h-[3px] w-0 bg-flame transition-all duration-300 ease-out group-hover:w-full" />
             </TiltCard>
