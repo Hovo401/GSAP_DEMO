@@ -20,7 +20,7 @@
   "contactPanel": {
     "eyebrow": "Get in touch",
     "title": "Let's connect",
-    "subtitle": "No contact form here — just pick whichever works for you.",
+    "subtitle": "",
     "ariaContactUs": "Contact links",
     "ariaClose": "Close contact panel",
     "links": {
@@ -149,18 +149,14 @@
   "statsIntro": {
     "kicker": "About",
     "heading": "Hovhannes Karapetyan",
-    "role": "Software Engineer · Founder of Diotek",
-    "bio": "I'm a software engineer building reliable, scalable web products end to end — from API and database design to the interfaces people actually use. I care about secure, fast software and modern engineering practices on real projects.",
+    "role": "Software Engineer",
+    "bio": "I'm a software engineer building reliable, full-stack web products — from API and database design to the interfaces people actually use. I care about secure, fast software and modern engineering practices across the entire stack.",
     "stack": {
       "backend": "Backend",
-      "frontend": "Frontend"
-    }
-  },
-  "stats": {
-    "items": [
-      { "label": "years building software" },
-      { "label": "technologies in the stack" }
-    ]
+      "frontend": "Frontend",
+      "devops": "DevOps"
+    },
+    "contactCta": "Get in touch ↗"
   },
   "magicSection": {
     "phrase": "Ready to *build something real?*"
