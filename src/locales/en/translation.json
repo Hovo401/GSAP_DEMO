@@ -37,7 +37,7 @@
     "subtitle": "We design, build and ship fast, polished web products — from landing pages to full-stack apps.",
     "scrollHint": "Scroll to see how",
     "metaTopLeft": "Available for work",
-    "metaTopRight": "React / TypeScript / Node",
+    "metaTopRight": "TypeScript / Node",
     "metaBottom": "Remote — worldwide"
   },
   "manifesto": "We treat every project like it's our own product. Clean code, fast load times, and pixel-true interfaces — no shortcuts, no excuses.",
@@ -64,16 +64,16 @@
   "features": {
     "items": [
       {
-        "title": "Frontend & interfaces",
-        "body": "Pixel-true UI built in React — fast, accessible, and animated when it earns its place."
+        "title": "Landing pages",
+        "body": "Conversion-focused sites for businesses — clear copy, fast load, built to bring in clients."
       },
       {
         "title": "Full-stack web apps",
         "body": "End-to-end products: frontend, backend, database and auth, shipped as one cohesive build."
       },
       {
-        "title": "Landing pages",
-        "body": "Conversion-focused sites for businesses — clear copy, fast load, built to bring in clients."
+        "title": "Frontend & interfaces",
+        "body": "Pixel-true UI built in React — fast, accessible, and animated when it earns its place."
       },
       {
         "title": "Backend & API",
@@ -150,7 +150,7 @@
     "kicker": "About",
     "heading": "Hovhannes Karapetyan",
     "role": "Software Engineer",
-    "bio": "I'm a software engineer building reliable, full-stack web products — from API and database design to the interfaces people actually use. I care about secure, fast software and modern engineering practices across the entire stack.",
+    "bio": "I'm a software engineer building reliable, full-stack web products — from API and database design to the interfaces people actually use. I care about secure, fast software and modern engineering practices across the entire stack. My goal is to create high-quality technical solutions that contribute to business growth and efficiency.",
     "stack": {
       "backend": "Backend",
       "frontend": "Frontend",
