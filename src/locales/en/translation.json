@@ -59,25 +59,37 @@
   "featuresIntro": {
     "kicker": "What we do",
     "heading": "Built to ship",
-    "body": "Four ways we help clients turn an idea into a live, working product."
+    "body": "Seven ways we turn your idea into a live product that earns its keep — from a first landing page to a full-scale platform."
   },
   "features": {
     "items": [
       {
         "title": "Landing pages",
-        "body": "Conversion-focused sites for businesses — clear copy, fast load, built to bring in clients."
+        "body": "Conversion-first landing pages that turn traffic into leads — clear messaging, sub-second load, and one obvious next step for every visitor."
       },
       {
         "title": "Full-stack web apps",
-        "body": "End-to-end products: frontend, backend, database and auth, shipped as one cohesive build."
+        "body": "Turnkey products built end-to-end — frontend, backend, database and auth shipped as one cohesive system you fully own."
       },
       {
         "title": "Frontend & interfaces",
-        "body": "Pixel-true UI built in React — fast, accessible, and animated when it earns its place."
+        "body": "Pixel-true interfaces in React — fast, accessible and responsive on every device, so the product feels right from the first click."
       },
       {
         "title": "Backend & API",
-        "body": "Server-side logic, APIs and third-party integrations that are reliable under real traffic."
+        "body": "Robust server logic, APIs and integrations that stay reliable under real traffic — secure, documented and ready to scale."
+      },
+      {
+        "title": "E-commerce",
+        "body": "Online stores that sell — catalog, cart, checkout and payments, plus CRM and delivery integrations wired into one smooth buying flow."
+      },
+      {
+        "title": "Animation & interaction",
+        "body": "Scroll-driven animation and interactive interfaces with GSAP — motion that guides attention and makes the brand memorable, never just decoration."
+      },
+      {
+        "title": "Parsers & automation",
+        "body": "Data parsers and automation scripts that collect, clean and deliver data where you need it — saving hours of manual work every week."
       }
     ]
   },
@@ -166,7 +178,7 @@
     "menu": "Menu",
     "elsewhere": "Elsewhere",
     "backToTop": "Back to top",
-    "rightsNote": "All motion reserved.",
+    "rightsNote": "",
     "links": ["Email", "GitHub", "LinkedIn", "Telegram"]
   }
 }
