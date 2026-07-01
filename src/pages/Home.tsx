@@ -100,8 +100,8 @@ export default function Home() {
         <Features />
         <StudioCanvas />
         <Approach />
-        <Stats />
         <MagicReveal />
+        <Stats />
         <Footer />
       </Suspense>
     </div>

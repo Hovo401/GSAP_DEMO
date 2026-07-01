@@ -14,7 +14,7 @@ export default function TextReveal() {
     () => {
       if (reduced || !textRef.current) return;
 
-      const split = new SplitText(textRef.current, { type: "chars" });
+      const split = new SplitText(textRef.current, { type: "chars", tag: "span" });
 
       gsap.fromTo(
         split.chars,

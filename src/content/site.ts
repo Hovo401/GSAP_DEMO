@@ -248,7 +248,11 @@ export const socialLinks: SocialLink[] = [
     href: "mailto:hovo.55.k.yan@gmail.com",
     handle: "hovo.55.k.yan@gmail.com",
   },
-  { key: "github", href: "https://github.com/Hovo401", handle: "github.com/Hovo401" },
+  {
+    key: "github",
+    href: "https://github.com/Hovo401",
+    handle: "github.com/Hovo401",
+  },
   {
     key: "linkedin",
     href: "https://www.linkedin.com/in/hovo401",
@@ -257,11 +261,11 @@ export const socialLinks: SocialLink[] = [
   { key: "telegram", href: "https://t.me/hovo401", handle: "@hovo401" },
 ];
 
-export const approachTones: ("ink" | "flame")[] = ["ink", "flame", "ink", "flame"];
-
-export const stats = [
-  { value: 6, suffix: "+" },
-  { value: 20, suffix: "+" },
+export const approachTones: ("ink" | "flame")[] = [
+  "ink",
+  "flame",
+  "ink",
+  "flame",
 ];
 
 export const aboutStack = [
@@ -272,13 +276,43 @@ export const aboutStack = [
       "Nest.js",
       "PostgreSQL",
       "MongoDB",
+      "Prisma ORM",
       "Redis",
-      "REST & GraphQL",
-      "Docker · CI/CD",
+      "REST, GraphQL",
+      "WebSockets, WebRTC",
+      "Jest",
+      "Kafka, RabbitMQ",
+      "JWT/OAuth",
+      "OWASP",
     ],
   },
   {
-    items: ["React", "Next.js", "TypeScript", "Zustand", "TanStack Query", "Tailwind CSS"],
+    items: [
+      "React",
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "Shadcn UI",
+      "Radix UI",
+      "Zustand",
+      "TanStack Query",
+      "GSAP",
+      "Three.js",
+    ],
+  },
+  {
+    items: [
+      "Linux",
+      "Ansible",
+      "Docker",
+      "GitHub Actions CI/CD",
+      "AWS EC2",
+      "AWS Lambda",
+      "AWS S3",
+      "pm2",
+      "Grafana",
+      "ELK / Loki",
+    ],
   },
 ];
 

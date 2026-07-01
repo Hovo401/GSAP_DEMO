@@ -6,7 +6,6 @@ import { useScramble } from "../hooks/useScramble";
 import { CaseOverlay } from "./showcase/CaseOverlay";
 import { useShowcaseBlob } from "./showcase/useShowcaseBlob";
 import type { Project } from "./showcase/types";
-import { socialLinks } from "../content/site";
 
 type ShowcaseItem = { title: string; tag: string; body: string; detail: string };
 
@@ -220,12 +219,6 @@ export default function Showcase() {
             <br />
             {t("showcaseOutro.headingLine2")}
           </h2>
-          <a
-            href={socialLinks[0].href}
-            className="mt-10 inline-flex w-fit items-center gap-3 border-2 border-paper px-8 py-4 text-sm font-bold tracking-widest text-paper uppercase transition-colors duration-200 hover:bg-paper hover:text-ink"
-          >
-            {t("showcaseOutro.cta")}
-          </a>
         </div>
       </div>
 
