@@ -49,7 +49,7 @@ body {
 
 @media (min-width: 1920px) {
   html {
-    font-size: clamp(16px, 0.8333vw, 32px);
+    font-size: 0.8333vw;
   }
 }
 
