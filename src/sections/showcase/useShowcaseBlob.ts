@@ -34,7 +34,11 @@ export function useShowcaseBlob(
       const sparks = (blobs.sparks.current ?? []).filter(
         (el): el is HTMLDivElement => el !== null,
       );
-      if (reduced || !trackEl || !carrier || !leadFill) return;
+      const goodEnoughWebKit =
+        typeof CSS !== "undefined" &&
+        CSS.supports?.("overflow", "clip") !== false;
+      if (reduced || !goodEnoughWebKit || !trackEl || !carrier || !leadFill)
+        return;
 
       const fills = [leadFill, ...droplets];
 
