@@ -136,8 +136,8 @@ export default function Hero() {
       const glowAY = gsap.quickTo(glowARef.current, "y", quickToOpts);
       const glowBX = gsap.quickTo(glowBRef.current, "x", quickToOpts);
       const glowBY = gsap.quickTo(glowBRef.current, "y", quickToOpts);
-      const tiltX = gsap.quickTo(tiltRef.current, "rotateX", quickToOpts);
-      const tiltY = gsap.quickTo(tiltRef.current, "rotateY", quickToOpts);
+      const tiltX = gsap.quickTo(tiltRef.current, "rotationX", quickToOpts);
+      const tiltY = gsap.quickTo(tiltRef.current, "rotationY", quickToOpts);
       const titleX = gsap.quickTo(titleWrapRef.current, "x", quickToOpts);
       const titleY = gsap.quickTo(titleWrapRef.current, "y", quickToOpts);
       const kickerX = gsap.quickTo(kickerWrapRef.current, "x", quickToOpts);

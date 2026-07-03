@@ -71,13 +71,28 @@ export default function Home() {
       maybeRefresh();
     };
     globalThis.addEventListener("app:preload-done", onPreloadDone);
-    document.fonts.ready.then(() => {
+
+    if ("fonts" in document) {
+      document.fonts.ready.then(() => {
+        fontsDone = true;
+        maybeRefresh();
+      });
+    } else {
+      fontsDone = true;
+    }
+
+    // Slow/blocked font fetch (e.g. Google Fonts unreachable) can leave
+    // fonts.ready pending indefinitely — don't let that stall the only
+    // ScrollTrigger.refresh() forever.
+    const fontsTimeout = setTimeout(() => {
       fontsDone = true;
       maybeRefresh();
-    });
+    }, 2500);
 
-    return () =>
+    return () => {
       globalThis.removeEventListener("app:preload-done", onPreloadDone);
+      clearTimeout(fontsTimeout);
+    };
   }, []);
 
   return (

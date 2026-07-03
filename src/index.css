@@ -162,6 +162,20 @@ html {
   }
 }
 
+/* Coarse-pointer (touch) devices skew toward older/weaker GPUs that choke
+   on the animated SVG goo filter + backdrop-filter blur, turning GSAP's
+   scrubbed transforms into dropped frames. Drop the decor there. */
+@media (pointer: coarse) {
+  .showcase-goo,
+  .showcase-spark {
+    display: none;
+  }
+  .nav-glass {
+    background-color: color-mix(in srgb, var(--color-paper) 90%, transparent);
+    backdrop-filter: none;
+  }
+}
+
 header button,
 nav button {
   outline: none !important;
