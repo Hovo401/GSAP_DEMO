@@ -30,9 +30,21 @@ html,
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  /* overflow-x: clip crops without turning html/body into a scroll
+     container, unlike `hidden` — which breaks ScrollTrigger's
+     position:fixed pinning on old WebKit/Android. The two rules below
+     must stay in separate @supports blocks: a plain fallback pair here
+     gets collapsed by the CSS minifier into just the unsupported one. */
+  overflow-x: clip;
   background-color: var(--color-ink);
   color: var(--color-paper);
+}
+
+@supports not (overflow: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
 }
 
 ::selection {
@@ -128,6 +140,17 @@ html {
   .grain::after {
     display: none;
   }
+  .showcase-goo,
+  .showcase-spark {
+    display: none;
+  }
+}
+
+/* Old WebKit/Android renders an SVG filter + mix-blend-mode on a
+   transformed compositing layer as solid black. `overflow: clip` support
+   is a reliable proxy for "new enough to composite this correctly"
+   (Safari 16+, Chrome 90+), so use it to silently drop the goo decor. */
+@supports not (overflow: clip) {
   .showcase-goo,
   .showcase-spark {
     display: none;

@@ -11,4 +11,8 @@ import { useGSAP } from "@gsap/react";
 // instead of the initial bundle.
 gsap.registerPlugin(ScrollTrigger, SplitText, Flip, useGSAP);
 
+// Old iOS Safari fires resize on every address-bar show/hide during scroll;
+// without this, pinned sections re-measure mid-gesture and drift/jump.
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 export { gsap, ScrollTrigger, SplitText, Flip, useGSAP };
