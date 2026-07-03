@@ -205,7 +205,7 @@ export default function Header() {
                   onClick={() =>
                     isContact ? openContact() : goTo(item.href!, i)
                   }
-                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, item.key)}`}
+                  className={`relative z-10 mx-0.5 flex h-10 cursor-pointer items-center rounded-full px-5 text-[0.9375rem] font-medium whitespace-nowrap transition-colors duration-200 ${itemTone(active, item.key)}`}
                 >
                   <span
                     className={`block h-6 overflow-hidden ${active ? "" : "group/label"}`}

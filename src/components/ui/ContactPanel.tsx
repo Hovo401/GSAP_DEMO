@@ -163,7 +163,7 @@ export default function ContactPanel({ open, onClose }: Props) {
         >
           <div className="flex min-h-full flex-col px-8 py-10 sm:px-12 sm:py-14">
             <div className="contact-stagger flex items-start justify-between">
-              <span className="flex items-center gap-3 text-[19px] text-black/55">
+              <span className="flex items-center gap-3 text-[1.1875rem] text-black/55">
                 <span className="h-2.5 w-2.5 rounded-full bg-ink/55" />
                 {t("contactPanel.eyebrow")}
               </span>
@@ -188,7 +188,7 @@ export default function ContactPanel({ open, onClose }: Props) {
 
             <div className="contact-stagger mt-8 h-px w-full bg-black/15" />
 
-            <p className="contact-stagger mt-8 max-w-[40ch] text-[15px] text-black/55">
+            <p className="contact-stagger mt-8 max-w-[40ch] text-[0.9375rem] text-black/55">
               {t("contactPanel.subtitle")}
             </p>
 
@@ -206,10 +206,10 @@ export default function ContactPanel({ open, onClose }: Props) {
                       {icons[link.key]}
                     </span>
                     <span className="flex flex-col">
-                      <span className="text-[17px] font-medium text-ink">
+                      <span className="text-[1.0625rem] font-medium text-ink">
                         {t(`contactPanel.links.${link.key}`)}
                       </span>
-                      <span className="text-[14px] text-black/45">{link.handle}</span>
+                      <span className="text-[0.875rem] text-black/45">{link.handle}</span>
                     </span>
                   </span>
                   <span className="text-black/30 transition-colors group-hover:text-flame">
