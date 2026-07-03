@@ -3,12 +3,15 @@ import { useTranslation } from "react-i18next";
 import { gsap, ScrollTrigger, SplitText, useGSAP } from "../lib/gsap";
 import { magicSection } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useLowPower } from "../hooks/useLowPower";
 
 export default function MagicReveal() {
   const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLHeadingElement>(null);
-  const reduced = useReducedMotion();
+  const reducedMotion = useReducedMotion();
+  const lowPower = useLowPower();
+  const reduced = reducedMotion || lowPower;
 
   useGSAP(
     () => {

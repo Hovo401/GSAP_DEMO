@@ -162,18 +162,17 @@ html {
   }
 }
 
-/* Coarse-pointer (touch) devices skew toward older/weaker GPUs that choke
-   on the animated SVG goo filter + backdrop-filter blur, turning GSAP's
-   scrubbed transforms into dropped frames. Drop the decor there. */
-@media (pointer: coarse) {
-  .showcase-goo,
-  .showcase-spark {
-    display: none;
-  }
-  .nav-glass {
-    background-color: color-mix(in srgb, var(--color-paper) 90%, transparent);
-    backdrop-filter: none;
-  }
+/* Low-power devices (coarse pointer + low deviceMemory/cores, see
+   useLowPower.ts) choke on the animated SVG goo filter + backdrop-filter
+   blur, turning GSAP's scrubbed transforms into dropped frames / solid-black
+   render glitches. Drop the decor there. */
+.low-power .showcase-goo,
+.low-power .showcase-spark {
+  display: none;
+}
+.low-power .nav-glass {
+  background-color: color-mix(in srgb, var(--color-paper) 90%, transparent);
+  backdrop-filter: none;
 }
 
 header button,

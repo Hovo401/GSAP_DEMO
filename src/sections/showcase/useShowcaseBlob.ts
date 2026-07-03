@@ -37,15 +37,7 @@ export function useShowcaseBlob(
       const goodEnoughWebKit =
         typeof CSS !== "undefined" &&
         CSS.supports?.("overflow", "clip") !== false;
-      const coarsePointer = globalThis.matchMedia("(pointer: coarse)").matches;
-      if (
-        reduced ||
-        !goodEnoughWebKit ||
-        coarsePointer ||
-        !trackEl ||
-        !carrier ||
-        !leadFill
-      )
+      if (reduced || !goodEnoughWebKit || !trackEl || !carrier || !leadFill)
         return;
 
       const fills = [leadFill, ...droplets];
