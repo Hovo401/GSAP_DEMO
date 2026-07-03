@@ -106,7 +106,6 @@ html {
     transparent 60%
   );
   backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
 .showcase-goo {
