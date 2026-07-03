@@ -112,7 +112,7 @@ export function renderBoard(props: BoardProps) {
           onPointerEnter={keepHoverDelete}
           onMouseLeave={clearHoverDelete}
           style={{ left: hoverDelete.x, top: hoverDelete.y }}
-          className="absolute z-30 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-flame bg-ink text-xs text-flame hover:bg-flame hover:text-ink"
+          className="absolute z-30 flex h-[24px] w-[24px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-flame bg-ink text-[12px] text-flame hover:bg-flame hover:text-ink"
         >
           ×
         </button>
@@ -160,14 +160,14 @@ function renderNote(
       }`}
       style={{ left: `${node.x}px`, top: `${node.y}px` }}
     >
-      <div className="node-card relative w-44 rounded-xl border border-paper/20 bg-[#191919] px-5 py-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] md:w-52">
+      <div className="node-card relative w-[176px] rounded-[12px] border border-paper/20 bg-[#191919] px-[20px] py-[16px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] md:w-[208px]">
         {interactive && !isEditing && (
-          <div onPointerDown={(e) => e.stopPropagation()} className="absolute top-2 right-2 flex gap-1">
+          <div onPointerDown={(e) => e.stopPropagation()} className="absolute top-[8px] right-[8px] flex gap-[4px]">
             <button
               type="button"
               aria-label={studio.editLabel}
               onClick={() => openEdit(node)}
-              className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-paper/40 hover:bg-paper/10 hover:text-paper"
+              className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full text-[16px] text-paper/40 hover:bg-paper/10 hover:text-paper"
             >
               ✎
             </button>
@@ -175,7 +175,7 @@ function renderNote(
               type="button"
               aria-label={studio.deleteLabel}
               onClick={() => handleDeleteNote(node.id)}
-              className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-paper/40 hover:bg-paper/10 hover:text-flame"
+              className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full text-[16px] text-paper/40 hover:bg-paper/10 hover:text-flame"
             >
               ✕
             </button>
@@ -183,37 +183,37 @@ function renderNote(
         )}
 
         {isEditing ? (
-          <div onPointerDown={(e) => e.stopPropagation()} className="flex flex-col gap-2 pt-1">
+          <div onPointerDown={(e) => e.stopPropagation()} className="flex flex-col gap-[8px] pt-[4px]">
             <input
               value={draft.label}
               onChange={(e) => updateDraftLabel(e.target.value)}
               placeholder="Label"
-              className="rounded border border-paper/20 bg-ink px-2 py-1 text-sm text-paper outline-none focus:border-flame"
+              className="rounded-[4px] border border-paper/20 bg-ink px-[8px] py-[4px] text-[14px] text-paper outline-none focus:border-flame"
             />
             <input
               value={draft.sub}
               onChange={(e) => updateDraftSub(e.target.value)}
               placeholder="Note"
-              className="rounded border border-paper/20 bg-ink px-2 py-1 text-xs text-paper/70 outline-none focus:border-flame"
+              className="rounded-[4px] border border-paper/20 bg-ink px-[8px] py-[4px] text-[12px] text-paper/70 outline-none focus:border-flame"
             />
             <button
               type="button"
               onClick={commitEdit}
-              className="cursor-pointer self-end rounded-full bg-flame px-3 py-1 text-xs font-bold tracking-widest text-ink uppercase"
+              className="cursor-pointer self-end rounded-full bg-flame px-[12px] py-[4px] text-[12px] font-bold tracking-widest text-ink uppercase"
             >
               {studio.saveLabel}
             </button>
           </div>
         ) : (
           <>
-            <span className={`text-[0.6rem] font-bold tracking-[0.25em] uppercase ${meta.color}`}>
+            <span className={`text-[9.6px] font-bold tracking-[0.25em] uppercase ${meta.color}`}>
               {meta.label}
             </span>
-            <p className="font-display mt-1 text-2xl leading-[0.95] text-paper uppercase wrap-break-word hyphens-auto md:text-3xl">
+            <p className="font-display mt-[4px] text-[24px] leading-[0.95] text-paper uppercase wrap-break-word hyphens-auto md:text-[30px]">
               {node.label}
             </p>
             {node.sub && (
-              <p className="mt-1 text-xs font-light wrap-break-word text-paper/45">{node.sub}</p>
+              <p className="mt-[4px] text-[12px] font-light wrap-break-word text-paper/45">{node.sub}</p>
             )}
           </>
         )}
@@ -221,14 +221,14 @@ function renderNote(
         {hasInput(node.kind) && (
           <span
             data-port={`${node.id}:in`}
-            className="absolute top-1/2 left-0 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-flame bg-ink"
+            className="absolute top-1/2 left-0 h-[16px] w-[16px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-flame bg-ink"
           />
         )}
         {hasOutput(node.kind) && (
           <span
             data-port={`${node.id}:out`}
             data-clickable="true"
-            className={`absolute top-1/2 right-0 h-4 w-4 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-flame bg-flame/80 ${
+            className={`absolute top-1/2 right-0 h-[16px] w-[16px] translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-flame bg-flame/80 ${
               interactive ? "cursor-crosshair" : ""
             }`}
           />

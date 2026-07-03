@@ -383,7 +383,7 @@ export default function StudioCanvas() {
               updateDraftSub,
               commitEdit,
             })}
-            <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 text-xs tracking-[0.25em] text-paper/40 uppercase">
+            <div className="pointer-events-none absolute bottom-[20px] left-1/2 -translate-x-1/2 text-[12px] tracking-[0.25em] text-paper/40 uppercase">
               {studio.footnote}
             </div>
           </>
@@ -394,7 +394,7 @@ export default function StudioCanvas() {
                 type="button"
                 onClick={handleResetPage}
                 aria-label={studio.resetLabel}
-                className="absolute top-5 right-5 z-30 cursor-pointer rounded-full border border-paper/20 bg-ink/60 px-4 py-1.5 text-xs font-medium tracking-[0.15em] text-paper/70 uppercase backdrop-blur-sm hover:border-flame hover:text-flame"
+                className="absolute top-[20px] right-[20px] z-30 cursor-pointer rounded-full border border-paper/20 bg-ink/60 px-[16px] py-[6px] text-[12px] font-medium tracking-[0.15em] text-paper/70 uppercase backdrop-blur-sm hover:border-flame hover:text-flame"
               >
                 {studio.resetLabel}
               </button>
@@ -417,7 +417,7 @@ export default function StudioCanvas() {
                 >
                   <span
                     ref={watermarkRef}
-                    className="font-display pointer-events-none absolute top-[40%] left-[48%] text-[30rem] leading-none text-paper/3 uppercase will-change-transform"
+                    className="font-display pointer-events-none absolute top-[40%] left-[48%] text-[480px] leading-none text-paper/3 uppercase will-change-transform"
                   >
                     {studio.watermark}
                   </span>
@@ -450,19 +450,19 @@ export default function StudioCanvas() {
 
             <div
               ref={hintRef}
-              className="pointer-events-none absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-paper/15 bg-ink/60 px-4 py-2 text-xs tracking-[0.25em] text-paper/60 uppercase backdrop-blur-sm"
+              className="pointer-events-none absolute bottom-[20px] left-1/2 flex -translate-x-1/2 items-center gap-[8px] rounded-full border border-paper/15 bg-ink/60 px-[16px] py-[8px] text-[12px] tracking-[0.25em] text-paper/60 uppercase backdrop-blur-sm"
             >
               <span className="text-flame">⟿</span>
               {studio.dragHint} · drag the wall to roam
             </div>
 
-            <div className="absolute right-5 bottom-5 z-30 flex flex-col gap-1.5">
+            <div className="absolute right-[20px] bottom-[20px] z-30 flex flex-col gap-[6px]">
               <button
                 type="button"
                 onClick={handleZoomIn}
                 disabled={zoom >= ZOOM_MAX}
                 aria-label="Zoom in"
-                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-[16px] text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
               >
                 +
               </button>
@@ -471,7 +471,7 @@ export default function StudioCanvas() {
                 onClick={handleZoomOut}
                 disabled={zoom <= minZoom}
                 aria-label="Zoom out"
-                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-base text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-full border border-paper/20 bg-ink/60 text-[16px] text-paper/70 backdrop-blur-sm hover:border-flame hover:text-flame disabled:cursor-not-allowed disabled:opacity-30"
               >
                 −
               </button>
