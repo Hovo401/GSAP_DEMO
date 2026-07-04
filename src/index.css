@@ -106,7 +106,6 @@ html {
     transparent 60%
   );
   backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
 .showcase-goo {
@@ -161,6 +160,19 @@ html {
   .showcase-spark {
     display: none;
   }
+}
+
+/* Low-power devices (coarse pointer + low deviceMemory/cores, see
+   useLowPower.ts) choke on the animated SVG goo filter + backdrop-filter
+   blur, turning GSAP's scrubbed transforms into dropped frames / solid-black
+   render glitches. Drop the decor there. */
+.low-power .showcase-goo,
+.low-power .showcase-spark {
+  display: none;
+}
+.low-power .nav-glass {
+  background-color: color-mix(in srgb, var(--color-paper) 90%, transparent);
+  backdrop-filter: none;
 }
 
 header button,

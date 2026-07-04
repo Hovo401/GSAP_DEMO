@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { gsap, ScrollTrigger, useGSAP } from "../lib/gsap";
 import { approachTones } from "../content/site";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useLowPower } from "../hooks/useLowPower";
 import { approachDecor } from "./approach/decor";
 
 type ApproachItem = { title: string; body: string };
@@ -10,7 +11,9 @@ type ApproachItem = { title: string; body: string };
 export default function Approach() {
   const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
+  const reducedMotion = useReducedMotion();
+  const lowPower = useLowPower();
+  const reduced = reducedMotion || lowPower;
   const approach = (
     t("approach.items", { returnObjects: true }) as ApproachItem[]
   ).map((item, i) => ({

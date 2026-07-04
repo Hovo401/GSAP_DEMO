@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { gsap, useGSAP } from "../lib/gsap";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useLowPower } from "../hooks/useLowPower";
 import { useScramble } from "../hooks/useScramble";
 import { CaseOverlay } from "./showcase/CaseOverlay";
 import { useShowcaseBlob } from "./showcase/useShowcaseBlob";
@@ -13,7 +14,9 @@ export default function Showcase() {
   const { t } = useTranslation();
   const root = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
+  const reducedMotion = useReducedMotion();
+  const lowPower = useLowPower();
+  const reduced = reducedMotion || lowPower;
   const introTitle = t("showcaseIntro.title");
   const introHeadingRef = useScramble<HTMLHeadingElement>(introTitle);
   const showcase: Project[] = (
